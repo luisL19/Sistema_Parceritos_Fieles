@@ -167,7 +167,7 @@ const NavBarGerente = () => {
               {initials} {/* Muestra las iniciales dentro del círculo */}
             </Circle>
             <DropdownContent className="dropdown-content">
-              <DropdownContentLink href="/miPerfilE">Mi Perfil</DropdownContentLink>
+              <DropdownContentLink href="/MiPerfilG">Mi Perfil</DropdownContentLink>
               <DropdownContentLink href="#" onClick={handleLogout}>
                 Cerrar sesión
               </DropdownContentLink>

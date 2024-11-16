@@ -1,32 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/navBarGerente';
 import Footer from '../../components/footer';
-import axios from 'axios';
 import Imagen from '../../assets/Imagenes/usuario.png';
 import './MiPerfilG.css'
 
 const MiPerfilG = () => {
-  const [usuario, setUsuario] = useState(null);
+  const [cliente, setcliente] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const userId = localStorage.getItem('usuarioId');
 
   useEffect(() => {
-    const fetchUsuario = async () => {
-      const id = localStorage.getItem('usuarioId');
-      if (id) {
+    const fetchData = async () => {
         try {
-          const respuesta = await axios.get(`http://localhost:3002/Usuarios/`);
-          const usuarios = respuesta.data;
-          const usuarioEncontrado = usuarios.find(user => user.id === id);
-          setUsuario(usuarioEncontrado);
+            const response = await fetch(`http://localhost:5000/api/usuarios/${userId}/perfil`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const data = await response.json();
+            setcliente(data);
         } catch (error) {
-          console.error('Error al obtener el perfil:', error);
+            console.error('Error al obtener datos del perfil:', error);
+        } finally {
+            setLoading(false);
         }
-      }
     };
+    fetchData();
+}, [userId]);
 
-    fetchUsuario();
-  }, []);
-
-  if (!usuario) {
+  if (!cliente) {
     return <div>Cargando...</div>;
   }
 
@@ -42,23 +43,23 @@ const MiPerfilG = () => {
           <div className="miPerfilG-infoGrid">
             <div className="miPerfilG-infoItem">
               <i className="icon-user" />
-              <p><strong>Nombre</strong><br />{usuario.Nombre}</p>
+              <p><strong>Nombre</strong><br />{cliente.nombre}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-user" />
-              <p><strong>Apellido</strong><br />{usuario.Apellido}</p>
+              <p><strong>Apellido</strong><br />{cliente.apellido}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-email" />
-              <p><strong>Correo</strong><br />{usuario.Correo}</p>
+              <p><strong>Correo</strong><br />{cliente.correo}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-phone" />
-              <p><strong>Celular</strong><br />{usuario.Celular}</p>
+              <p><strong>Celular</strong><br />{cliente.celular}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-document" />
-              <p><strong>Tipo documento</strong><br />{usuario.TipoDocumento}</p>
+              <p><strong>Tipo documento</strong><br />{cliente.tipo_Documento}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-lock" />
@@ -66,11 +67,11 @@ const MiPerfilG = () => {
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-address" />
-              <p><strong>Dirección</strong><br />{usuario.Direccion}</p>
+              <p><strong>Dirección</strong><br />{cliente.direccion}</p>
             </div>
             <div className="miPerfilG-infoItem">
               <i className="icon-document" />
-              <p><strong>Numero documento</strong><br />{usuario.NumeroDocumento}</p>
+              <p><strong>Numero documento</strong><br />{cliente.numero_Documento}</p>
             </div>
           </div>
           <br />

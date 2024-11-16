@@ -1,35 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useParams } from 'react-router-dom';
 import NavBarEmpleado from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
 import Imagen from '../../assets/Imagenes/perro2perfil.jpeg';
 
 const VerPerfilMascota = () => {
+  const { id } = useParams();
   const [mascota, setMascota] = useState(null);
   const [dueno, setDueno] = useState(null);
 
   useEffect(() => {
     const fetchMascota = async () => {
-      const id = localStorage.getItem('mascotaId');
-      if (!id) {
-        console.error('No se encontró el ID de la mascota en el localStorage');
-        return;
-      }
 
       try {
-        const respuestaMascota = await axios.get(`http://localhost:3002/Mascotas/${id}`);
-        setMascota(respuestaMascota.data);
-
-        const idUsuario = respuestaMascota.data.usuarioId;
-        const respuestaDueno = await axios.get(`http://localhost:3002/Usuarios/${idUsuario}`);
-        setDueno(respuestaDueno.data);
+        const respuesta = await axios.get(`http://localhost:5000/api/empleados/mascotas/perfil/${id}`);
+        setMascota(respuesta.data.mascota);
+        setDueno(respuesta.data.dueno);
       } catch (error) {
         console.error('Error al obtener los detalles:', error);
       }
     };
 
     fetchMascota();
-  }, []);
+  }, [id]);
 
   if (!mascota || !dueno) {
     return <div style={styles.loading}>Cargando...</div>;
@@ -79,6 +73,20 @@ const VerPerfilMascota = () => {
                 <span>{mascota.raza}</span>
               </div>
             </div>
+            <div style={styles.infoItem}>
+              <i className="fa-solid fa-paw" style={styles.icon} />
+              <div style={styles.infoText}>
+                <span style={styles.infoLabel}>Esterilizado:</span>
+                <span>{mascota.esterilizado ? 'Sí' : 'No'}</span>
+              </div>
+            </div>
+            <div style={styles.infoItem}>
+              <i className="fa-solid fa-paw" style={styles.icon} />
+              <div style={styles.infoText}>
+                <span style={styles.infoLabel}>Enfermedades:</span>
+                <span>{mascota.enfermedades || 'Ninguna'}</span>
+              </div>
+            </div>
           </div>
 
           {/* Columna del dueño */}
@@ -88,21 +96,28 @@ const VerPerfilMascota = () => {
               <i className="fa-solid fa-user" style={styles.icon} />
               <div style={styles.infoText}>
                 <span style={styles.infoLabel}>Nombre:</span>
-                <span>{dueno.Nombre} {dueno.Apellido}</span>
+                <span>{dueno.nombre}</span>
               </div>
             </div>
             <div style={styles.infoItem}>
               <i className="fa-solid fa-envelope" style={styles.icon} />
               <div style={styles.infoText}>
                 <span style={styles.infoLabel}>Correo:</span>
-                <span>{dueno.Correo}</span>
+                <span>{dueno.correo}</span>
               </div>
             </div>
             <div style={styles.infoItem}>
               <i className="fa-solid fa-phone" style={styles.icon} />
               <div style={styles.infoText}>
                 <span style={styles.infoLabel}>Celular:</span>
-                <span>{dueno.Celular}</span>
+                <span>{dueno.celular}</span>
+              </div>
+            </div>
+            <div style={styles.infoItem}>
+              <i className="fa-solid fa-map-marker-alt" style={styles.icon} />
+              <div style={styles.infoText}>
+                <span style={styles.infoLabel}>Dirección:</span>
+                <span>{dueno.direccion}</span>
               </div>
             </div>
           </div>

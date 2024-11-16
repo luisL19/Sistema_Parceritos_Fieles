@@ -1,56 +1,100 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/navBarGerente';
 import Footer from '../../components/footer';
-import axios from 'axios';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import './actualizarMisDatosG.css';
+import Swal from 'sweetalert2';
 
 const ActualizarMisDatosG = () => {
-  const [usuario, setUsuario] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [cliente, setCliente] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    contraseña: '',
+    celular: '',
+    direccion: '',
+    tipo_Documento: '',
+    numero_Documento: ''
+});
+const [loading, setLoading] = useState(true);
+const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar la contraseña
+const userId = localStorage.getItem('usuarioId');
 
   useEffect(() => {
-    const fetchUsuario = async () => {
-      const id = localStorage.getItem('usuarioId');
-      if (id) {
+    const fetchData = async () => {
         try {
-          const respuesta = await axios.get(`http://localhost:3002/Usuarios/`);
-          const usuarios = respuesta.data;
-          const usuarioEncontrado = usuarios.find(user => user.id === id);
-          setUsuario(usuarioEncontrado);
+            const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const clienteData = await response.json();
+            setCliente(clienteData);
         } catch (error) {
-          console.error('Error al obtener el perfil:', error);
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
         }
-      }
     };
 
-    fetchUsuario();
-  }, []);
+    fetchData();
+}, [userId]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
 
-    if (usuario) {
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setCliente(prevState => ({
+      ...prevState,
+      [name]: value
+  }));
+};
+
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  console.log("Datos a enviar:", cliente); // Verificar los datos enviados
+
+  const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¡No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, actualizarlo'
+  });
+  
+  if (result.isConfirmed) {
       try {
-        await axios.put(`http://localhost:3002/Usuarios/${usuario.id}`, {
-          Nombre: event.target.nombre.value,
-          Apellido: event.target.apellido.value,
-          Correo: event.target.correo.value,
-          Contraseña: event.target.contraseña.value,
-          Celular: event.target.celular.value,
-          Direccion: event.target.direccion.value,
-          TipoDocumento: usuario.TipoDocumento, // No editable
-          NumeroDocumento: usuario.NumeroDocumento // No editable
-        });
-        alert('Datos actualizados exitosamente');
+          const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(cliente),
+          });
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          await Swal.fire({
+              title: 'Actualizado!',
+              text: 'Tus datos han sido actualizados.',
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
+          });
       } catch (error) {
-        console.error('Error al actualizar los datos:', error);
-        alert('Error al actualizar los datos');
+          console.error('Error updating data:', error);
+          await Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudieron actualizar los datos. Inténtalo de nuevo más tarde.',
+              confirmButtonText: 'Aceptar'
+          });
       }
-    }
-  };
+  }
+};
 
-  if (!usuario) {
+  if (!cliente) {
     return <div>Cargando...</div>;
   }
 
@@ -68,7 +112,7 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="nombre"
                   name="nombre"
-                  defaultValue={usuario.Nombre}
+                  defaultValue={cliente.nombre}
                   disabled
                 />
               </div>
@@ -78,7 +122,7 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="apellido"
                   name="apellido"
-                  defaultValue={usuario.Apellido}
+                  defaultValue={cliente.apellido}
                   disabled
                 />
               </div>
@@ -88,7 +132,8 @@ const ActualizarMisDatosG = () => {
                   type="email"
                   id="correo"
                   name="correo"
-                  defaultValue={usuario.Correo}
+                  defaultValue={cliente.correo}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -99,7 +144,8 @@ const ActualizarMisDatosG = () => {
                     type={showPassword ? 'text' : 'password'}
                     id="contraseña"
                     name="contraseña"
-                    defaultValue={usuario.Contraseña}
+                    defaultValue={cliente.contraseña}
+                    onChange={handleChange}
                     required
                   />
                   <span
@@ -116,7 +162,8 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="celular"
                   name="celular"
-                  defaultValue={usuario.Celular}
+                  defaultValue={cliente.celular}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -126,7 +173,8 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="direccion"
                   name="direccion"
-                  defaultValue={usuario.Direccion}
+                  defaultValue={cliente.direccion}
+                  onChange={handleChange}
                   required
                 />
               </div>
@@ -136,7 +184,7 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="tipo_documento"
                   name="tipo_documento"
-                  defaultValue={usuario.TipoDocumento}
+                  defaultValue={cliente.tipo_Documento}
                   disabled
                 />
               </div>
@@ -146,7 +194,7 @@ const ActualizarMisDatosG = () => {
                   type="text"
                   id="numero_documento"
                   name="numero_documento"
-                  defaultValue={usuario.NumeroDocumento}
+                  defaultValue={cliente.numero_Documento}
                   disabled
                 />
               </div>

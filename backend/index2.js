@@ -474,7 +474,7 @@ app.post('/api/quejas', async (req, res) => {
       const idCliente = clienteResult[0].id_Cliente;
 
       // Insertar la queja en la tabla `quejas` con la fecha actual
-      const quejaResult = await executeQuery('INSERT INTO quejas (contenido, fecha) VALUES (?, ?)', [contenido, fecha]);
+      const quejaResult = await executeQuery(`INSERT INTO quejas (contenido, fecha, respuesta, estado) VALUES (?, ?, NULL, 'Por responder')`,[contenido, fecha]);
 
       const idQueja = quejaResult.insertId;
 
@@ -730,7 +730,8 @@ app.get('/api/empleados/consultar-mascotas', async (req, res) => {
       m.raza, 
       m.edad, 
       m.sexo, 
-      m.peso, 
+      m.peso,
+      m.enfermedades, 
       c.id_Cliente, 
       u.nombre AS nombre_dueño, 
       u.direccion, 
@@ -848,6 +849,115 @@ app.put('/api/reservas/:id/estado', async (req, res) => {
   } catch (error) {
     console.error('Error al actualizar el estado de la reserva:', error.message);
     res.status(500).json({ error: 'Error al actualizar el estado de la reserva.' });
+  }
+});
+
+
+// Endpoint para obtener todas las quejas
+app.get('/api/empleado/quejas', async (req, res) => {
+  const sql = `
+    SELECT q.id_Queja, q.fecha, q.contenido, q.respuesta,
+           u.nombre AS nombre_cliente, u.apellido AS apellido_cliente, u.correo
+    FROM quejas q
+    INNER JOIN clientequeja cq ON q.id_Queja = cq.id_QuejaFK1
+    INNER JOIN cliente c ON cq.id_ClienteFK2 = c.id_Cliente
+    INNER JOIN usuario u ON c.id_Usuario = u.id_Usuario
+    ORDER BY q.fecha DESC
+  `;
+
+  try {
+    const results = await executeQuery(sql);
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'No se encontraron quejas.' });
+    }
+
+    res.status(200).json(results);
+  } catch (error) {
+    console.error('Error al obtener las quejas:', error.message);
+    res.status(500).json({ error: 'Error al obtener las quejas.' });
+  }
+});
+
+
+// Endpoint para responder una queja 
+app.put('/api/empleado/quejas/:id', async (req, res) => {
+  const { id } = req.params;
+  const { respuesta } = req.body;
+
+  if (!respuesta) {
+    return res.status(400).json({ error: 'La respuesta es obligatoria.' });
+  }
+
+  try {
+    const result = await executeQuery(
+      'UPDATE quejas SET respuesta = ?, estado = "Respondida" WHERE id_Queja = ?',
+      [respuesta, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Queja no encontrada.' });
+    }
+
+    res.status(200).json({ message: 'Queja respondida exitosamente.' });
+  } catch (error) {
+    console.error('Error al responder la queja:', error.message);
+    res.status(500).json({ error: 'Error al responder la queja.' });
+  }
+});
+
+
+// Endpoint para actualizar el rol de un usuario
+app.put('/api/usuarios/:id/rol', async (req, res) => {
+  const { id } = req.params; // ID del usuario enviado desde el frontend
+  const { rol } = req.body; // Nuevo rol enviado en el cuerpo de la solicitud
+
+  if (!rol) {
+    return res.status(400).json({ error: 'El campo "rol" es obligatorio.' });
+  }
+
+  // Verifica que el rol sea válido
+  const rolesPermitidos = ['Cliente', 'Empleado'];
+  if (!rolesPermitidos.includes(rol)) {
+    return res.status(400).json({ error: 'El rol especificado no es válido.' });
+  }
+
+  try {
+    const result = await executeQuery(
+      'UPDATE usuario SET rol = ? WHERE id_Usuario = ?',
+      [rol, id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    res.status(200).json({ message: `El rol del usuario se actualizó a "${rol}" exitosamente.` });
+  } catch (error) {
+    console.error('Error al actualizar el rol del usuario:', error.message);
+    res.status(500).json({ error: 'Error al actualizar el rol del usuario.' });
+  }
+});
+
+
+// Endpoint para buscar usuario por número de documento
+app.get('/api/usuarios/buscar', async (req, res) => {
+  const { documento } = req.query;
+
+  if (!documento) {
+    return res.status(400).json({ error: 'El número de documento es requerido.' });
+  }
+
+  try {
+    const usuario = await executeQuery('SELECT * FROM usuario WHERE numero_Documento = ?', [documento]);
+
+    if (usuario.length === 0) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
+
+    res.status(200).json(usuario[0]);
+  } catch (error) {
+    console.error('Error al buscar el usuario:', error.message);
+    res.status(500).json({ error: 'Error al buscar el usuario.' });
   }
 });
 

@@ -3,6 +3,7 @@ import axios from 'axios';
 import Footer from '../../components/footer';
 import './consultarMascotaG.css';
 import NavBarGerente from '../../components/navBarGerente';
+import { useNavigate } from 'react-router-dom';
 
 const ConsultarMascotG = () => {
   const [mascotas, setMascotas] = useState([]);
@@ -10,6 +11,7 @@ const ConsultarMascotG = () => {
   const [sexoFiltro, setSexoFiltro] = useState('');
   const [edadMinFiltro, setEdadMinFiltro] = useState('');
   const [edadMaxFiltro, setEdadMaxFiltro] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerMascotas = async () => {
@@ -36,9 +38,10 @@ const ConsultarMascotG = () => {
   };
 
   const verPerfil = (id) => {
-    localStorage.setItem('mascotaId', id);
-    window.location.href = '/verPerfilMascotaG';
+    navigate(`/verPerfilMascota/${id}`);
   };
+
+  
 
   return (
     <div className="consultarMascotG-body">
@@ -94,18 +97,18 @@ const ConsultarMascotG = () => {
               </thead>
               <tbody>
                 {filtrarMascotas().map((mascota) => (
-                  <tr key={mascota.id}>
+                  <tr key={mascota.id_Mascota}>
                     <td className="consultarMascotG-td">{mascota.nombre_mascota}</td>
                     <td className="consultarMascotG-td">{mascota.raza}</td>
                     <td className="consultarMascotG-td">{mascota.edad} años</td>
                     <td className="consultarMascotG-td">{mascota.sexo}</td>
                     <td className="consultarMascotG-td">{mascota.enfermedades}</td>
-                    <td className="consultarMascotG-td">{mascota.peso}</td>
+                    <td className="consultarMascotG-td">{mascota.peso} Kg</td>
                     <td className="consultarMascotG-td">{mascota.esterilizado ? 'Sí' : 'No'}</td>
                     <td className="consultarMascotG-td">
                       <button
                         className="consultarMascotG-icon-button"
-                        onClick={() => verPerfil(mascota.id)}
+                        onClick={() => verPerfil(mascota.id_Mascota)}
                       >
                         <i className="fas fa-user"></i>
                       </button>

@@ -4,6 +4,7 @@ import NavBarEmpleado from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons'; // Importa el icono de perfil
+import { useNavigate } from 'react-router-dom';
 
 const ConsultarMascotas = () => {
   const [mascotas, setMascotas] = useState([]);
@@ -11,6 +12,7 @@ const ConsultarMascotas = () => {
   const [sexoFiltro, setSexoFiltro] = useState('');
   const [edadMinFiltro, setEdadMinFiltro] = useState('');
   const [edadMaxFiltro, setEdadMaxFiltro] = useState('');
+  const navigate = useNavigate();
 
   useEffect(() => {
     const obtenerMascotas = async () => {
@@ -37,8 +39,7 @@ const ConsultarMascotas = () => {
   };
 
   const verPerfil = (id) => {
-    localStorage.setItem('mascotaId', id);
-    window.location.href = '/verPerfilMascota';
+    navigate(`/verPerfilMascota/${id}`);
   };
 
   const styles = {
@@ -174,12 +175,12 @@ const ConsultarMascotas = () => {
               </thead>
               <tbody>
                 {filtrarMascotas().map((mascota) => (
-                  <tr key={mascota.id}>
+                  <tr key={mascota.id_Mascota}>
                     <td style={styles.td}>{mascota.nombre_mascota}</td>
                     <td style={styles.td}>{mascota.raza}</td>
                     <td style={styles.td}>{mascota.edad} años</td>
                     <td style={styles.td}>{mascota.sexo}</td>
-                    <td style={styles.td}>{mascota.enfermedades}</td>
+                    <td style={styles.td}>{mascota.enfermedades} Kg</td>
                     <td style={styles.td}>{mascota.peso}</td>
                     <td style={styles.td}>{mascota.esterilizado ? 'Sí' : 'No'}</td>
                     <td style={styles.td}>
@@ -187,7 +188,7 @@ const ConsultarMascotas = () => {
                         style={styles.button}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}
-                        onClick={() => verPerfil(mascota.id)}
+                        onClick={() => verPerfil(mascota.id_Mascota)}
                       >
                         <FontAwesomeIcon icon={faUser} style={styles.icon} />
                       </button>

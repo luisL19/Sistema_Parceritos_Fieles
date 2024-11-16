@@ -4,7 +4,6 @@ import Footer from '../../components/footer';
 import styled from 'styled-components';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import emailjs from 'emailjs-com';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye } from '@fortawesome/free-solid-svg-icons';
 
@@ -122,19 +121,20 @@ const ConsultarQuejaE = () => {
 
   useEffect(() => {
     const fetchQuejas = async () => {
-      try {
-        const response = await axios.get('http://localhost:3002/Quejas/');
-        // Invertir el orden de los registros para que el último registro sea el primero
-        const data = response.data.reverse();
-        setQuejas(data);
-        setFilteredQuejas(data);
-      } catch (error) {
-        console.error('Error al obtener las quejas:', error);
-      }
+        try {
+            const response = await axios.get('http://localhost:5000/api/empleado/quejas'); // Cambia a la nueva ruta
+            // Invertir el orden de los registros para que el último registro sea el primero
+            const data = response.data.reverse();
+            setQuejas(data); // Actualiza el estado con las quejas obtenidas
+            setFilteredQuejas(data); // Actualiza el estado de las quejas filtradas
+        } catch (error) {
+            console.error('Error al obtener las quejas:', error);
+        }
     };
 
     fetchQuejas();
-  }, []);
+}, []);
+
 
   useEffect(() => {
     const aplicarFiltros = () => {
@@ -156,48 +156,45 @@ const ConsultarQuejaE = () => {
 
   const toggleQueja = (index) => {
     setMostrarQueja(mostrarQueja === index ? null : index);
-  };
+  }; 
 
   const handleEnviarRespuesta = async (queja) => {
     if (!respuesta) return;
-
+  
     try {
-      const updatedQueja = { ...queja, Respuesta: respuesta };
-      await axios.put(`http://localhost:3002/Quejas/${queja.id}`, updatedQueja);
-
-      const emailParams = {
-        to_name: queja.nombre,
-        message: respuesta,
-        to_email: queja.correo,
-      };
-
-      await emailjs.send(
-        'service_ry1g0os',
-        'template_ldrsz2k',
-        emailParams,
-        'I20QJHbvYjkT3UX_N'
-      );
-
+      // Enviar la respuesta al backend junto con el ID de la queja
+      await axios.put(`http://localhost:5000/api/empleado/quejas/${queja.id_Queja}`, {
+        respuesta,
+      });
+  
+      // Actualizar el estado local para reflejar los cambios sin recargar
       setQuejas((prevQuejas) =>
         prevQuejas.map((q) =>
-          q.id === queja.id ? { ...q, Respuesta: respuesta } : q
+          q.id_Queja === queja.id_Queja ? { ...q, Respuesta: respuesta } : q
         )
       );
-
+  
       Swal.fire({
         position: 'top-end',
         icon: 'success',
         title: 'Tu respuesta ha sido enviada',
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
       });
-
+  
       setRespuesta('');
     } catch (error) {
       console.error('Error al enviar la respuesta:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo enviar la respuesta. Inténtalo nuevamente.',
+      });
     }
   };
+  
 
+  
   return (
     <div>
       <NavBar />
@@ -230,8 +227,8 @@ const ConsultarQuejaE = () => {
             <thead>
               <tr>
                 <Th>Fecha</Th>
-                <Th>Hora</Th>
                 <Th>Nombre</Th>
+                <Th>Apellido</Th>
                 <Th>Correo</Th>
                 <Th>Acción</Th>
               </tr>
@@ -241,8 +238,8 @@ const ConsultarQuejaE = () => {
                 <React.Fragment key={queja.id}>
                   <tr>
                     <Td>{queja.fecha}</Td>
-                    <Td>{queja.hora}</Td>
-                    <Td>{queja.nombre}</Td>
+                    <Td>{queja.nombre_cliente}</Td>
+                    <Td>{queja.apellido_cliente}</Td>
                     <Td>{queja.correo}</Td>
                     <Td>
                       <Button primary onClick={() => toggleQueja(index)}>
@@ -254,20 +251,23 @@ const ConsultarQuejaE = () => {
                     <tr>
                       <Td colSpan={6}>
                         <QuejaContent>
-                          <p>{queja.texto}</p>
+                          <p>{queja.contenido}</p>
                           <ResponseSection>
-                            {queja.Respuesta ? (
-                              <p>Respuesta: {queja.Respuesta}</p>
+                            {queja.respuesta ? (
+                              <p style={{ fontWeight: 'bold', color: 'green' }}>
+                                Respuesta: {queja.respuesta}
+                              </p>
                             ) : (
                               <>
                                 <TextArea
                                   value={respuesta}
                                   onChange={(e) => setRespuesta(e.target.value)}
                                   placeholder="Escribe tu respuesta aquí..."
+                                  disabled={queja.respuesta !== null} // Deshabilitar si ya hay respuesta
                                 />
                                 <Button
                                   onClick={() => handleEnviarRespuesta(queja)}
-                                  disabled={!respuesta}
+                                  disabled={!respuesta || queja.respuesta !== null} // Deshabilitar si ya hay respuesta o no hay texto
                                 >
                                   Enviar Respuesta
                                 </Button>
@@ -278,6 +278,7 @@ const ConsultarQuejaE = () => {
                       </Td>
                     </tr>
                   )}
+
                 </React.Fragment>
               ))}
             </tbody>

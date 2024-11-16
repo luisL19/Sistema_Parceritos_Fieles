@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import Perro1 from '../../assets/Imagenes/perro1.jpeg';
 import 'tailwindcss/tailwind.css';
 import logo from '../../assets/Imagenes/logo.png';
+import axios from 'axios'
 
 const HeroSection = styled.section`
   position: relative;
@@ -154,56 +155,72 @@ const MenuGerente = () => {
         setShowClienteSearch(true);
     };
 
-    const handleBuscarCliente = () => {
-        const cliente = clientes.find(cliente => cliente.NumeroDocumento === documentoBusqueda);
-        setClienteEncontrado(cliente);
-    };
-
-    const handleCambioRol = (clienteId) => {
-        const cliente = clientes.find(c => c.id === clienteId);
-
-        if (cliente) {
-            fetch(`http://localhost:3002/Usuarios/${clienteId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ...cliente,
-                    Rol: 'Empleado'
-                }),
-            })
-                .then(response => response.json())
-                .then(updatedCliente => {
-                    setEmpleados([...empleados, updatedCliente]);
-                    setClientes(clientes.filter(c => c.id !== clienteId));
-                    setClienteEncontrado(null);
-                    setDocumentoBusqueda('');
-                    setShowClienteSearch(false);
-
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "success",
-                        title: "Empleado agregado exitosamente",
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                })
-                .catch(error => {
-                    console.error('Error changing role:', error);
-                    Swal.fire({
-                        position: "top-end",
-                        icon: "error",
-                        title: "Error al agregar empleado",
-                        showConfirmButton: false,
-                        timer: 1500
-                    });
-                });
-        } else {
-            console.error('Cliente no encontrado');
+    const handleBuscarCliente = async () => {
+        try {
+          const response = await axios.get(`http://localhost:5000/api/usuarios/buscar/${documentoBusqueda}`);
+          setClienteEncontrado(response.data); // Actualiza el estado con los datos del cliente encontrado
+        } catch (error) {
+          console.error('Error al buscar el cliente:', error);
+          Swal.fire({
+            position: 'top-end',
+            icon: 'error',
+            title: 'Cliente no encontrado.',
+            showConfirmButton: false,
+            timer: 1500
+          });
+          setClienteEncontrado(null); // Resetea el estado si no encuentra al cliente
         }
-    };
+      };
+      
 
+      const handleCambioRol = async (documento) => {
+        try {
+          // Verificar cliente en el backend usando el número de documento
+          const response = await axios.get(`http://localhost:5000/api/usuarios/buscar/${documento}`);
+          const cliente = response.data;
+      
+          if (!cliente) {
+            console.error('Cliente no encontrado');
+            Swal.fire({
+              position: "top-end",
+              icon: "error",
+              title: "Cliente no encontrado",
+              showConfirmButton: false,
+              timer: 1500
+            });
+            return;
+          }
+      
+          // Cambiar el rol del cliente
+          await axios.put(`http://localhost:5000/api/usuarios/${cliente.id}/rol`, { rol: 'Empleado' });
+      
+          setEmpleados([...empleados, { ...cliente, Rol: 'Empleado' }]);
+          setClientes(clientes.filter(c => c.NumeroDocumento !== documento));
+          setClienteEncontrado(null);
+          setDocumentoBusqueda('');
+          setShowClienteSearch(false);
+      
+          Swal.fire({
+            position: "top-end",
+            icon: "success",
+            title: "Empleado agregado exitosamente",
+            showConfirmButton: false,
+            timer: 1500
+          });
+        } catch (error) {
+          console.error('Error al cambiar el rol:', error);
+          Swal.fire({
+            position: "top-end",
+            icon: "error",
+            title: "Error al agregar empleado",
+            showConfirmButton: false,
+            timer: 1500
+          });
+        }
+      };
+      
+      
+      
     const handleCloseModal = () => {
         setShowClienteSearch(false);
         setClienteEncontrado(null);

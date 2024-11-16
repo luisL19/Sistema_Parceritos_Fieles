@@ -1,0 +1,1 @@
+Muchachos, ya el backend está al 95%, solo me falta el agregar empleado y ya, no se les olvide arreglar el login y registrar, y Lugin, revisa bien ese data table que hasta le pregunté a Chat y las dependencias que me daba no funcionaban, asi que tuve que quitar el import de donde lo colocaste, o sea, Consultar Mascota en cliente

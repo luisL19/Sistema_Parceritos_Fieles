@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
-import axios from 'axios';
 import styled from 'styled-components';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
@@ -97,85 +96,95 @@ const FormGrid = styled.div`
 `;
 
 const ActualizarMisDatos = () => {
-  const [usuario, setUsuario] = useState(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [cliente, setCliente] = useState({
+    nombre: '',
+    apellido: '',
+    correo: '',
+    contraseña: '',
+    celular: '',
+    direccion: '',
+    tipo_Documento: '',
+    numero_Documento: ''
+});
+const [loading, setLoading] = useState(true);
+const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar la contraseña
+const userId = localStorage.getItem('usuarioId');
 
   useEffect(() => {
-    const fetchUsuario = async () => {
-      const id = localStorage.getItem('usuarioId');
-      if (id) {
+    const fetchData = async () => {
         try {
-          const respuesta = await axios.get(`http://localhost:3002/Usuarios/`);
-          const usuarios = respuesta.data;
-          const usuarioEncontrado = usuarios.find(user => user.id === id);
-          setUsuario(usuarioEncontrado);
+            const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! Status: ${response.status}`);
+            }
+            const clienteData = await response.json();
+            setCliente(clienteData);
         } catch (error) {
-          console.error('Error al obtener el perfil:', error);
+            console.error('Error fetching data:', error);
+        } finally {
+            setLoading(false);
         }
-      }
     };
 
-    fetchUsuario();
-  }, []);
+    fetchData();
+}, [userId]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
 
-    if (usuario) {
-      const swalWithBootstrapButtons = Swal.mixin({
-        customClass: {
-          confirmButton: 'btn btn-success',
-          cancelButton: 'btn btn-danger'
-        },
-        buttonsStyling: false
-      });
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setCliente(prevState => ({
+      ...prevState,
+      [name]: value
+  }));
+};
 
-      swalWithBootstrapButtons.fire({
-        title: '¿Estás seguro?',
-        text: '¡No podrás revertir esto!',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: 'Sí, actualizar!',
-        cancelButtonText: 'No, cancelar!',
-        reverseButtons: true
-      }).then(async (result) => {
-        if (result.isConfirmed) {
-          try {
-            await axios.put(`http://localhost:3002/Usuarios/${usuario.id}`, {
-              Nombre: usuario.Nombre, // No editable
-              Apellido: usuario.Apellido, // No editable
-              Correo: event.target.correo.value,
-              Contraseña: event.target.contraseña.value,
-              Celular: event.target.celular.value,
-              Direccion: event.target.direccion.value,
-              TipoDocumento: usuario.TipoDocumento, // No editable
-              NumeroDocumento: usuario.NumeroDocumento // No editable
-            });
-            swalWithBootstrapButtons.fire({
+
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  
+  console.log("Datos a enviar:", cliente); // Verificar los datos enviados
+
+  const result = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: '¡No podrás revertir esto!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, actualizarlo'
+  });
+  
+  if (result.isConfirmed) {
+      try {
+          const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`, {
+              method: 'PUT',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(cliente),
+          });
+          if (!response.ok) {
+              throw new Error(`HTTP error! Status: ${response.status}`);
+          }
+          await Swal.fire({
               title: 'Actualizado!',
               text: 'Tus datos han sido actualizados.',
-              icon: 'success'
-            });
-          } catch (error) {
-            console.error('Error al actualizar los datos:', error);
-            swalWithBootstrapButtons.fire({
-              title: 'Error',
-              text: 'Hubo un problema al actualizar los datos.',
-              icon: 'error'
-            });
-          }
-        } else if (result.dismiss === Swal.DismissReason.cancel) {
-          swalWithBootstrapButtons.fire({
-            title: 'Cancelado',
-            text: 'Tus datos no han sido actualizados.',
-            icon: 'error'
+              icon: 'success',
+              confirmButtonText: 'Aceptar'
           });
-        }
-      });
-    }
-  };
+      } catch (error) {
+          console.error('Error updating data:', error);
+          await Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: 'No se pudieron actualizar los datos. Inténtalo de nuevo más tarde.',
+              confirmButtonText: 'Aceptar'
+          });
+      }
+  }
+};
 
-  if (!usuario) {
+  if (!cliente) {
     return <div>Cargando...</div>;
   }
 
@@ -193,7 +202,7 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="nombre"
                   name="nombre"
-                  value={usuario.Nombre}
+                  value={cliente.nombre}
                   disabled
                 />
               </FormGroup>
@@ -203,7 +212,7 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="apellido"
                   name="apellido"
-                  value={usuario.Apellido}
+                  value={cliente.apellido}
                   disabled
                 />
               </FormGroup>
@@ -213,7 +222,8 @@ const ActualizarMisDatos = () => {
                   type="email"
                   id="correo"
                   name="correo"
-                  defaultValue={usuario.Correo}
+                  defaultValue={cliente.correo}
+                  onChange={handleChange}
                   required
                 />
               </FormGroup>
@@ -224,7 +234,8 @@ const ActualizarMisDatos = () => {
                     type={showPassword ? 'text' : 'password'}
                     id="contraseña"
                     name="contraseña"
-                    defaultValue={usuario.Contraseña}
+                    defaultValue={cliente.contraseña}
+                    onChange={handleChange}
                     required
                   />
                   <span
@@ -241,7 +252,8 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="celular"
                   name="celular"
-                  defaultValue={usuario.Celular}
+                  defaultValue={cliente.celular}
+                  onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
@@ -250,7 +262,8 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="direccion"
                   name="direccion"
-                  defaultValue={usuario.Direccion}
+                  defaultValue={cliente.direccion}
+                  onChange={handleChange}
                 />
               </FormGroup>
               <FormGroup>
@@ -259,7 +272,7 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="tipo_documento"
                   name="tipo_documento"
-                  defaultValue={usuario.TipoDocumento}
+                  defaultValue={cliente.tipo_Documento}
                   disabled
                 />
               </FormGroup>
@@ -269,7 +282,7 @@ const ActualizarMisDatos = () => {
                   type="text"
                   id="numero_documento"
                   name="numero_documento"
-                  defaultValue={usuario.NumeroDocumento}
+                  defaultValue={cliente.numero_Documento}
                   disabled
                 />
               </FormGroup>

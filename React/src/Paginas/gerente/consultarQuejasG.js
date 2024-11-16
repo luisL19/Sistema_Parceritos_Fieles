@@ -1,64 +1,193 @@
 import React, { useState, useEffect } from 'react';
 import NavBar from '../../components/navBarGerente';
 import Footer from '../../components/footer';
-import './consultarQuejasG.css';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
+
+const Container = styled.div`
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const Th = styled.th`
+  border-bottom: 2px solid #ddd;
+  padding: 12px;
+  background-color: #f4f4f4;
+`;
+
+const Td = styled.td`
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+`;
+
+const Button = styled.button`
+  background-color: ${(props) => (props.primary ? '#24ad60' : '#0d793c')};
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.primary ? '#0d793c' : '#218838')};
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  resize: vertical;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+`;
+
+const QuejaContent = styled.div`
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ResponseSection = styled.div`
+  margin-top: 20px;
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+  }
+
+  input, select {
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+  }
+`;
+
 
 const ConsultarQuejasG = () => {
   const [quejas, setQuejas] = useState([]);
+  const [filteredQuejas, setFilteredQuejas] = useState([]);
   const [mostrarQueja, setMostrarQueja] = useState(null);
-  const [respuestas, setRespuestas] = useState({}); // Mantén el estado de las respuestas
+  const [respuesta, setRespuesta] = useState('');
+  const [fechaFiltro, setFechaFiltro] = useState('');
+  const [respondidaFiltro, setRespondidaFiltro] = useState('');
 
   useEffect(() => {
     const fetchQuejas = async () => {
-      try {
-        const response = await axios.get('http://localhost:3002/Quejas/');
-        // Invertir el orden de los registros para que el último registro sea el primero
-        const data = response.data.reverse();
-        setQuejas(data);
-      } catch (error) {
-        console.error('Error al obtener las quejas:', error);
-      }
+        try {
+            const response = await axios.get('http://localhost:5000/api/empleado/quejas'); // Cambia a la nueva ruta
+            // Invertir el orden de los registros para que el último registro sea el primero
+            const data = response.data.reverse();
+            setQuejas(data); // Actualiza el estado con las quejas obtenidas
+            setFilteredQuejas(data); // Actualiza el estado de las quejas filtradas
+        } catch (error) {
+            console.error('Error al obtener las quejas:', error);
+        }
     };
 
     fetchQuejas();
-  }, []);
+}, []);
+
+  useEffect(() => {
+    const aplicarFiltros = () => {
+      let resultado = quejas;
+
+      if (fechaFiltro) {
+        resultado = resultado.filter(queja => queja.fecha.includes(fechaFiltro));
+      }
+
+      if (respondidaFiltro) {
+        resultado = resultado.filter(queja => (respondidaFiltro === 'respondida' ? queja.Respuesta : !queja.Respuesta));
+      }
+
+      setFilteredQuejas(resultado);
+    };
+
+    aplicarFiltros();
+  }, [fechaFiltro, respondidaFiltro, quejas]);
 
   const toggleQueja = (index) => {
     setMostrarQueja(mostrarQueja === index ? null : index);
-  };
+  }; 
 
-  const handleRespuestaChange = (index, value) => {
-    setRespuestas({ ...respuestas, [index]: value });
-  };
 
-  const enviarRespuesta = async (queja) => {
+  const handleEnviarRespuesta = async (queja) => {
+    if (!respuesta) return;
+  
     try {
-      // Aquí puedes hacer la llamada a la API para enviar la respuesta
-      await axios.post(`http://localhost:3002/Quejas/${queja.id}/responder`, { respuesta: respuestas[queja.id] });
-      
-      // Muestra la notificación de éxito
+      // Enviar la respuesta al backend junto con el ID de la queja
+      await axios.put(`http://localhost:5000/api/empleado/quejas/${queja.id_Queja}`, {
+        respuesta,
+      });
+  
+      // Actualizar el estado local para reflejar los cambios sin recargar
+      setQuejas((prevQuejas) =>
+        prevQuejas.map((q) =>
+          q.id_Queja === queja.id_Queja ? { ...q, Respuesta: respuesta } : q
+        )
+      );
+  
       Swal.fire({
         position: 'top-end',
         icon: 'success',
-        title: 'Respuesta enviada',
+        title: 'Tu respuesta ha sido enviada',
         showConfirmButton: false,
-        timer: 1500
+        timer: 1500,
       });
-
-      // Opcional: actualizar la lista de quejas para reflejar la nueva respuesta
-      const nuevasQuejas = quejas.map(q => q.id === queja.id ? { ...q, respondida: true } : q);
-      setQuejas(nuevasQuejas);
+  
+      setRespuesta('');
     } catch (error) {
       console.error('Error al enviar la respuesta:', error);
-      // Muestra una notificación de error si es necesario
       Swal.fire({
-        position: 'top-end',
         icon: 'error',
-        title: 'Error al enviar respuesta',
-        text: 'Hubo un problema al enviar la respuesta.',
-        showConfirmButton: true
+        title: 'Error',
+        text: 'No se pudo enviar la respuesta. Inténtalo nuevamente.',
       });
     }
   };
@@ -66,64 +195,93 @@ const ConsultarQuejasG = () => {
   return (
     <div>
       <NavBar />
-      <div className="consultarQuejasG-container">
+      <Container>
         <h2>Quejas</h2>
         <p>Estas son las últimas quejas registradas en el sistema</p>
-        <div className="consultarQuejasG-table-container">
-          <table className="consultarQuejasG-table">
+        <FilterContainer>
+          <label>
+            Fecha:
+            <input 
+              type="date" 
+              value={fechaFiltro} 
+              onChange={(e) => setFechaFiltro(e.target.value)} 
+            />
+          </label>
+          <label>
+            Estado:
+            <select 
+              value={respondidaFiltro} 
+              onChange={(e) => setRespondidaFiltro(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="respondida">Respondidas</option>
+              <option value="noRespondida">No Respondidas</option>
+            </select>
+          </label>
+        </FilterContainer>
+        <TableContainer>
+          <Table>
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Nombre</th>
-                <th>Correo</th>
-                <th>Acción</th>
+                <Th>Fecha</Th>
+                <Th>Nombre</Th>
+                <Th>Apellido</Th>
+                <Th>Correo</Th>
+                <Th>Acción</Th>
               </tr>
             </thead>
             <tbody>
-              {quejas.map((queja, index) => (
+              {filteredQuejas.map((queja, index) => (
                 <React.Fragment key={queja.id}>
                   <tr>
-                    <td>{queja.fecha}</td>
-                    <td>{queja.hora}</td>
-                    <td>{queja.nombre}</td>
-                    <td>{queja.correo}</td>
-                    <td>
-                      <i
-                        className={`fa-solid ${mostrarQueja === index ? 'fa-eye-slash' : 'fa-eye'} consultarQuejasG-icon`}
-                        onClick={() => toggleQueja(index)}
-                      />
-                    </td>
+                    <Td>{queja.fecha}</Td>
+                    <Td>{queja.nombre_cliente}</Td>
+                    <Td>{queja.apellido_cliente}</Td>
+                    <Td>{queja.correo}</Td>
+                    <Td>
+                      <Button primary onClick={() => toggleQueja(index)}>
+                        <FontAwesomeIcon icon={faEye} />
+                      </Button>
+                    </Td>
                   </tr>
                   {mostrarQueja === index && (
                     <tr>
-                      <td colSpan={5}>
-                        <div className="consultarQuejasG-queja-content">
-                          <p>{queja.texto}</p>
-                          <div className="consultarQuejasG-response-section">
-                            <textarea 
-                              className="consultarQuejasG-textarea" 
-                              placeholder="Escribe tu respuesta aquí..."
-                              value={respuestas[queja.id] || ''}
-                              onChange={(e) => handleRespuestaChange(queja.id, e.target.value)}
-                            />
-                            <button 
-                              className="consultarQuejasG-button" 
-                              onClick={() => enviarRespuesta(queja)}
-                            >
-                              Enviar Respuesta
-                            </button>
-                          </div>
-                        </div>
-                      </td>
+                      <Td colSpan={6}>
+                        <QuejaContent>
+                          <p>{queja.contenido}</p>
+                          <ResponseSection>
+                            {queja.respuesta ? (
+                              <p style={{ fontWeight: 'bold', color: 'green' }}>
+                                Respuesta: {queja.respuesta}
+                              </p>
+                            ) : (
+                              <>
+                                <TextArea
+                                  value={respuesta}
+                                  onChange={(e) => setRespuesta(e.target.value)}
+                                  placeholder="Escribe tu respuesta aquí..."
+                                  disabled={queja.respuesta !== null} // Deshabilitar si ya hay respuesta
+                                />
+                                <Button
+                                  onClick={() => handleEnviarRespuesta(queja)}
+                                  disabled={!respuesta || queja.respuesta !== null} // Deshabilitar si ya hay respuesta o no hay texto
+                                >
+                                  Enviar Respuesta
+                                </Button>
+                              </>
+                            )}
+                          </ResponseSection>
+                        </QuejaContent>
+                      </Td>
                     </tr>
                   )}
+
                 </React.Fragment>
               ))}
             </tbody>
-          </table>
-        </div>
-      </div>
+          </Table>
+        </TableContainer>
+      </Container>
       <Footer />
     </div>
   );
