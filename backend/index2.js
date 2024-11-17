@@ -120,7 +120,7 @@ app.post('/registrar-mascota', async (req, res) => {
   
     if (!nombre || !raza || !esterilizado || !sexo || !peso || !edad || !id_Usuario) {
       return res.status(400).json({ error: 'Todos los campos son requeridos.' });
-    }
+    } 
   
     try {
       // Buscar el id_Cliente usando el id_Usuario

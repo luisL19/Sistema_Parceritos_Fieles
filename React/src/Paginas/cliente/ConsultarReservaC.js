@@ -29,12 +29,12 @@ const ConsultarReservaC = () => {
               { title: 'Nombre Mascota', data: 'nombre_mascota' },
               {
                 title: 'Fecha Inicio',
-                data: 'fecha_inicio',
+                data: 'fecha_Inicio',
                 render: (data) => new Date(data).toLocaleDateString(),
               },
               {
                 title: 'Fecha Final',
-                data: 'fecha_fin',
+                data: 'fecha_Fin',
                 render: (data) => (data ? new Date(data).toLocaleDateString() : '-'),
               },
               { title: 'Estado', data: 'estado' },
@@ -108,6 +108,9 @@ const ConsultarReservaC = () => {
         </section>
       </main>
       <Footer />
+      <a href="https://wa.me/1234567890" className="whatsapp-button" target="_blank" rel="noopener noreferrer">
+        <i className="fab fa-whatsapp"></i>
+      </a>
     </div>
   );
 };

@@ -217,13 +217,8 @@ const RegistroMascota = () => {
         </form>
       </div>
       <Footer />
-      <a 
-        href="https://wa.me/3103409688" 
-        className="whatsapp-float" 
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
-        <FontAwesomeIcon icon={faWhatsapp} size="2x" />
+      <a href="https://wa.me/1234567890" className="whatsapp-button" target="_blank" rel="noopener noreferrer">
+        <i className="fab fa-whatsapp"></i>
       </a>
     </div>
   );
