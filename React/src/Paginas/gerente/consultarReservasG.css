@@ -1,48 +1,63 @@
-.consultarReservasG-container {
-    max-width: 90%;
-    margin: 0 auto;
-    padding: 20px;
-  }
-  
-  .consultarReservasG-filterContainer {
-    margin-bottom: 20px;
-  }
-  
-  .consultarReservasG-filterSelect {
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
-  }
-  
-  .consultarReservasG-tableContainer {
-    overflow-x: auto;
-  }
-  
-  .consultarReservasG-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  .consultarReservasG-th {
-    border-bottom: 2px solid #ddd;
-    padding: 12px;
-    background-color: #f4f4f4;
-  }
-  
-  .consultarReservasG-td {
-    border-bottom: 1px solid #ddd;
-    padding: 12px;
-  }
-  
-  .consultarReservasG-icon {
-    font-size: 20px;
-    color: #28a745; /* Color verde para el ícono */
-    cursor: pointer;
-    transition: color 0.3s ease;
-  }
-  
-  .consultarReservasG-icon:hover {
-    color: #218838; /* Color verde más oscuro al pasar el ratón */
-  }
-  
+.page-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 20px;
+}
+
+.content h2 {
+  font-family: 'Poppins-SemiBold', sans-serif;
+  color: #28a745;
+  font-size: 3.5rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(90deg, #1db954, #1ca54f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.table-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 95%;
+  margin: 20px auto;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+}
+
+table.dataTable {
+  width: 100% !important;
+  font-size: 1.2rem;
+}
+
+.btn-icon {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 1.5rem;
+  margin: 0 5px;
+}
+
+.icon-check {
+  color: #28a745;
+}
+
+.icon-cancel {
+  color: #dc3545;
+}
+
+.btn-icon:disabled {
+  opacity: 0.6;
+}
