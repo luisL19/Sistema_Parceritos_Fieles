@@ -1,207 +1,221 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import axios from 'axios';
 import NavBarEmpleado from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons'; // Importa el icono de perfil
-import { useNavigate } from 'react-router-dom';
+import $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-dt/css/jquery.dataTables.min.css';
 
 const ConsultarMascotas = () => {
-  const [mascotas, setMascotas] = useState([]);
-  const [razaFiltro, setRazaFiltro] = useState('');
-  const [sexoFiltro, setSexoFiltro] = useState('');
-  const [edadMinFiltro, setEdadMinFiltro] = useState('');
-  const [edadMaxFiltro, setEdadMaxFiltro] = useState('');
-  const navigate = useNavigate();
+  const tableRef = useRef(null);
 
   useEffect(() => {
     const obtenerMascotas = async () => {
       try {
         const respuesta = await axios.get('http://localhost:5000/api/empleados/consultar-mascotas');
-        setMascotas(respuesta.data);
+        const mascotasData = respuesta.data;
+
+        // Destruir instancia previa de DataTable si existe
+        if ($.fn.DataTable.isDataTable(tableRef.current)) {
+          $(tableRef.current).DataTable().destroy();
+        }
+
+        // Inicializar DataTable con los datos obtenidos
+        $(tableRef.current).DataTable({
+          data: mascotasData,
+          columns: [
+            { title: 'Nombre', data: 'nombre_mascota' },
+            { title: 'Raza', data: 'raza' },
+            { title: 'Edad', data: 'edad', render: (data) => `${data} años` },
+            { title: 'Sexo', data: 'sexo' },
+            { title: 'Enfermedades', data: 'enfermedades' },
+            { title: 'Peso', data: 'peso', render: (data) => `${data} Kg` },
+            { title: 'Esterilizado', data: 'esterilizado', render: (data) => (data ? 'Sí' : 'No') },
+            {
+              title: 'Acciones',
+              data: 'id_Mascota',
+              render: (data) =>
+                `<button class="btn-ver-perfil" data-id="${data}">
+                  Ver Perfil
+                </button>`,
+            },
+          ],
+          language: {
+            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
+          },
+          responsive: true,
+        });
+
+        // Manejar eventos de botones personalizados
+        $(tableRef.current).on('click', '.btn-ver-perfil', function () {
+          const idMascota = $(this).data('id');
+          verPerfil(idMascota);
+        });
       } catch (error) {
         console.error('Error al obtener las mascotas:', error);
       }
     };
 
     obtenerMascotas();
+
+    return () => {
+      // Verificar si DataTable está inicializado antes de destruirlo
+      if ($.fn.DataTable.isDataTable(tableRef.current)) {
+        $(tableRef.current).DataTable().destroy();
+      }
+    };
   }, []);
 
-  const filtrarMascotas = () => {
-    return mascotas.filter((mascota) => {
-      const cumpleRaza = razaFiltro ? mascota.raza.includes(razaFiltro) : true;
-      const cumpleSexo = sexoFiltro ? mascota.sexo === sexoFiltro : true;
-      const cumpleEdadMin = edadMinFiltro ? mascota.edad >= parseInt(edadMinFiltro) : true;
-      const cumpleEdadMax = edadMaxFiltro ? mascota.edad <= parseInt(edadMaxFiltro) : true;
-
-      return cumpleRaza && cumpleSexo && cumpleEdadMin && cumpleEdadMax;
-    });
-  };
-
   const verPerfil = (id) => {
-    navigate(`/verPerfilMascota/${id}`);
-  };
-
-  const styles = {
-    body: {
-      margin: 0,
-      fontFamily: 'sans-serif',
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'repeat',
-    },
-    container: {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      minHeight: 'calc(100vh - 80px)',
-      padding: '20px',
-    },
-    content: {
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '20px',
-      borderRadius: '10px',
-      width: '95%',
-      maxWidth: '1200px',
-    },
-    filters: {
-      marginBottom: '20px',
-      display: 'flex',
-      gap: '15px',
-      width: '100%',
-      justifyContent: 'space-around',
-    },
-    filterInput: {
-      padding: '10px',
-      borderRadius: '5px',
-      border: '1px solid #ddd',
-      width: '100%',
-    },
-    tableContainer: {
-      padding: '20px',
-      borderRadius: '5px',
-      width: '100%',
-      overflowX: 'auto',
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      textAlign: 'left',
-      color: 'black',
-    },
-    th: {
-      padding: '10px',
-      borderBottom: '1px solid #ddd',
-      backgroundColor: '#bfbcbcbf',
-      fontWeight: 'bold',
-    },
-    td: {
-      padding: '10px',
-      borderBottom: '1px solid #ddd',
-    },
-    button: {
-      backgroundColor: 'transparent', // Fondo transparente por defecto
-      border: 'none',
-      borderRadius: '5px',
-      cursor: 'pointer',
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: '0', // Elimina el padding para que solo se vea el icono
-    },
-    buttonHover: {
-      backgroundColor: '#4CAF50', // Fondo verde cuando se pasa el ratón
-    },
-    icon: {
-      fontSize: '30px', // Tamaño del icono
-      color: '#000', // Color del icono
-    }
+    window.location.href = `/verPerfilMascota/${id}`;
   };
 
   return (
-    <div style={styles.body}>
-      <NavBarEmpleado />
-      <section style={styles.container}>
-        <div style={styles.content}>
-          <h2>Consultar Mascotas</h2>
-          <div style={styles.filters}>
-            <input
-              type="text"
-              placeholder="Filtrar por Raza"
-              style={styles.filterInput}
-              value={razaFiltro}
-              onChange={(e) => setRazaFiltro(e.target.value)}
-            />
-            <select
-              style={styles.filterInput}
-              value={sexoFiltro}
-              onChange={(e) => setSexoFiltro(e.target.value)}
-            >
-              <option value="">Todos los sexos</option>
-              <option value="Macho">Macho</option>
-              <option value="Hembra">Hembra</option>
-            </select>
-            <input
-              type="number"
-              placeholder="Edad mínima"
-              style={styles.filterInput}
-              value={edadMinFiltro}
-              onChange={(e) => setEdadMinFiltro(e.target.value)}
-            />
-            <input
-              type="number"
-              placeholder="Edad máxima"
-              style={styles.filterInput}
-              value={edadMaxFiltro}
-              onChange={(e) => setEdadMaxFiltro(e.target.value)}
-            />
-          </div>
-          <div style={styles.tableContainer}>
-            <table style={styles.table}>
-              <thead>
-                <tr>
-                  <th style={styles.th}>Nombre</th>
-                  <th style={styles.th}>Raza</th>
-                  <th style={styles.th}>Edad</th>
-                  <th style={styles.th}>Sexo</th>
-                  <th style={styles.th}>Enfermedades</th>
-                  <th style={styles.th}>Peso</th>
-                  <th style={styles.th}>Esterilizado</th>
-                  <th style={styles.th}>Acción</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filtrarMascotas().map((mascota) => (
-                  <tr key={mascota.id_Mascota}>
-                    <td style={styles.td}>{mascota.nombre_mascota}</td>
-                    <td style={styles.td}>{mascota.raza}</td>
-                    <td style={styles.td}>{mascota.edad} años</td>
-                    <td style={styles.td}>{mascota.sexo}</td>
-                    <td style={styles.td}>{mascota.enfermedades} Kg</td>
-                    <td style={styles.td}>{mascota.peso}</td>
-                    <td style={styles.td}>{mascota.esterilizado ? 'Sí' : 'No'}</td>
-                    <td style={styles.td}>
-                      <button
-                        style={styles.button}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = styles.buttonHover.backgroundColor}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = styles.button.backgroundColor}
-                        onClick={() => verPerfil(mascota.id_Mascota)}
-                      >
-                        <FontAwesomeIcon icon={faUser} style={styles.icon} />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-      <Footer />
-    </div>
+    <>
+      <style>{`
+        body {
+          margin: 0;
+          font-family: sans-serif;
+          background-size: cover;
+          background-position: center;
+          color: white;
+        }
+
+        .page-container {
+          display: flex;
+          flex-direction: column;
+          min-height: 100vh;
+        }
+
+        .container {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          flex: 1;
+          padding: 20px;
+        }
+
+        .content h2 {
+          font-family: 'Poppins-SemiBold', sans-serif;
+          color: #28a745;
+          font-size: 3.5rem;
+          font-weight: bold;
+          text-align: center;
+          margin-bottom: 30px;
+          background: linear-gradient(90deg, #1db954, #1ca54f);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        }
+
+        .table-wrapper {
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          width: 95%;
+          margin: 20px auto;
+          border-radius: 10px;
+          background-color: #ffffff;
+          box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+          padding: 20px;
+        }
+
+        table.dataTable {
+          width: 100% !important;
+          max-width: 100%;
+          margin: 20px 0;
+          border-collapse: collapse;
+          font-size: 1.2rem;
+          text-align: center;
+        }
+
+        table.dataTable thead th {
+          background-color: #28a745;
+          color: white;
+          font-weight: bold;
+          padding: 15px;
+          text-align: center;
+          vertical-align: middle;
+        }
+
+        table.dataTable tbody tr {
+          background-color: #f9f9f9;
+        }
+
+        table.dataTable tbody tr:hover {
+          background-color: #e6ffe6;
+        }
+
+        table.dataTable td,
+        table.dataTable th {
+          padding: 15px;
+          text-align: center;
+          color: black;
+        }
+
+        .btn-ver-perfil {
+          padding: 8px 16px;
+          border: none;
+          border-radius: 5px;
+          background-color: #1db954;
+          color: white;
+          font-size: 1rem;
+          font-weight: bold;
+          cursor: pointer;
+          transition: background-color 0.3s ease;
+        }
+
+        .btn-ver-perfil:hover {
+          background-color: #1aa34a;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+          display: flex;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+
+        .dataTables_wrapper .dataTables_length label,
+        .dataTables_wrapper .dataTables_filter label {
+          font-size: 1rem;
+          font-weight: bold;
+          margin-right: 10px;
+          color: #333;
+        }
+
+        .dataTables_wrapper .dataTables_length select,
+        .dataTables_wrapper .dataTables_filter input {
+          font-size: 1rem;
+          padding: 10px;
+          border: 1px solid #ccc;
+          border-radius: 5px;
+        }
+
+        .dataTables_wrapper .dataTables_length select {
+          width: auto;
+        }
+
+        .dataTables_wrapper .dataTables_filter input {
+          width: 200px;
+        }
+      `}</style>
+      <div className="page-container">
+        <NavBarEmpleado />
+        <main>
+          <section className="container">
+            <div className="content">
+              <h2 className="fade-in">Consultar Mascotas</h2>
+              <div className="table-wrapper">
+                <table ref={tableRef} className="display" style={{ width: '100%' }}></table>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 };
 

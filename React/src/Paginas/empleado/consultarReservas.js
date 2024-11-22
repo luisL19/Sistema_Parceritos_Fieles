@@ -1,212 +1,217 @@
-import React, { useEffect, useState } from 'react';
-import NavBarEmpleado from '../../components/navBarEmpleado';
-import Footer from '../../components/footer';
-import styled from 'styled-components';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { MdCheckCircle } from 'react-icons/md';
-import { MdCancel } from 'react-icons/md';
-
-const Container = styled.div`
-  max-width: 90%;
-  margin: 0 auto;
-  padding: 20px;
-`;
-
-const FilterContainer = styled.div`
-  margin-bottom: 20px;
-`;
-
-const FilterSelect = styled.select`
-  padding: 10px;
-  font-size: 16px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-`;
-
-const TableContainer = styled.div`
-  overflow-x: auto;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-`;
-
-const Th = styled.th`
-  border-bottom: 2px solid #ddd;
-  padding: 12px;
-  background-color: #f4f4f4;
-`;
-
-const Td = styled.td`
-  border-bottom: 1px solid #ddd;
-  padding: 12px;
-`;
-
-const Button = styled.button`
-  background-color: ${(props) => (props.disabled ? '#ccc' : props.color || '#1cab1f')};
-  color: #fff;
-  border: none;
-  padding: 8px;
-  border-radius: 4px;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'pointer')};
-
-  &:hover {
-    background-color: ${(props) => (props.disabled ? '#ccc' : props.hoverColor || '#156d27')};
-  }
-`;
-
-const Icon = styled.div`
-  font-size: 20px;
-`;
+import NavBarEmpleado from '../../components/navBarEmpleado';
+import Footer from '../../components/footer';
+import $ from 'jquery';
+import 'datatables.net';
+import 'datatables.net-dt/css/jquery.dataTables.min.css';
 
 const ConsultarReservas = () => {
+  const tableRef = useRef(null);
   const [reservas, setReservas] = useState([]);
-  const [filtro, setFiltro] = useState('todos');
 
   useEffect(() => {
-    const fetchReservas = async () => {
+    const obtenerReservas = async () => {
       try {
         const respuesta = await axios.get('http://localhost:5000/api/reservas');
-        const data = respuesta.data.reverse();
-        setReservas(data);
+        const reservasData = respuesta.data.reverse();
+        setReservas(reservasData);
+
+        inicializarDataTable(reservasData);
       } catch (error) {
         console.error('Error al obtener las reservas:', error);
       }
     };
 
-    fetchReservas();
+    obtenerReservas();
+
+    return () => {
+      if ($.fn.DataTable.isDataTable(tableRef.current)) {
+        $(tableRef.current).DataTable().destroy();
+      }
+    };
   }, []);
+
+  const inicializarDataTable = (reservasData) => {
+    if ($.fn.DataTable.isDataTable(tableRef.current)) {
+      $(tableRef.current).DataTable().destroy();
+    }
+
+    $(tableRef.current).DataTable({
+      data: reservasData,
+      columns: [
+        {
+          title: 'Fecha de Inicio',
+          data: 'fecha_Inicio',
+          render: (data) => new Date(data).toLocaleDateString(),
+        },
+        {
+          title: 'Fecha de Final',
+          data: 'fecha_Fin',
+          render: (data) => new Date(data).toLocaleDateString(),
+        },
+        { title: 'Celular', data: 'celular' },
+        { title: 'Correo', data: 'correo' },
+        { title: 'Nombre del Dueño', data: 'nombre_dueño' },
+        { title: 'Nombre de la Mascota', data: 'nombre_mascota' },
+        { title: 'Tipo de Servicio', data: 'tipo_servicio' },
+        { title: 'Estado', data: 'estado' },
+        {
+          title: 'Acciones',
+          data: null,
+          render: (data, type, row, meta) => {
+            const confirmarDisabled = row.estado === 'Confirmado' || row.estado === 'Cancelado';
+            return `
+              <button class="btn-icon confirmar-btn" data-index="${meta.row}" ${confirmarDisabled ? 'disabled' : ''}>
+                <i class="fas fa-check-circle icon-check"></i>
+              </button>
+              <button class="btn-icon cancelar-btn" data-index="${meta.row}" ${confirmarDisabled ? 'disabled' : ''}>
+                <i class="fas fa-times-circle icon-cancel"></i>
+              </button>`;
+          },
+        },
+      ],
+      language: {
+        url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
+      },
+      responsive: true,
+    });
+
+    // Manejar eventos de botones personalizados
+    $(tableRef.current).on('click', '.confirmar-btn', function () {
+      const index = $(this).data('index');
+      actualizarEstadoReserva(index, 'Confirmado');
+    });
+
+    $(tableRef.current).on('click', '.cancelar-btn', function () {
+      const index = $(this).data('index');
+      actualizarEstadoReserva(index, 'Cancelado');
+    });
+  };
 
   const actualizarEstadoReserva = async (index, nuevoEstado) => {
     const reserva = reservas[index];
     const nuevaReserva = { ...reserva, estado: nuevoEstado };
 
-    try {
-      const result = await Swal.fire({
-        title: `¿Estás seguro de ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'} esta reserva?`,
-        text: "No podrás revertir esto.",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonText: `Sí, ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'}`,
-        cancelButtonText: 'No, mantener',
-        reverseButtons: true,
-        customClass: {
-          confirmButton: 'btn-confirmar',
-          cancelButton: 'btn-cancelar',
-          actions: 'actions'
-        },
-        buttonsStyling: false
-      });
-
+    Swal.fire({
+      title: `¿Estás seguro de ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'} esta reserva?`,
+      text: 'No podrás revertir esto.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: nuevoEstado === 'Confirmado' ? 'Confirmar' : 'Cancelar',
+      cancelButtonText: 'No',
+    }).then(async (result) => {
       if (result.isConfirmed) {
-        await axios.put(`http://localhost:5000/api/reservas/${reserva.id_Reservas}/estado`, { estado: nuevoEstado });
-        const nuevasReservas = reservas.map((reserva, i) =>
-          i === index ? nuevaReserva : reserva
-        );
-        setReservas(nuevasReservas);
-        Swal.fire({
-          title: nuevoEstado === 'Confirmado' ? 'Confirmada!' : 'Cancelada!',
-          text: `La reserva ha sido ${nuevoEstado.toLowerCase()}.`,
-          icon: 'success'
-        });
-      } else if (result.dismiss === Swal.DismissReason.cancel) {
-        Swal.fire({
-          title: 'Acción cancelada',
-          text: 'La reserva no ha sido modificada.',
-          icon: 'error'
-        });
+        try {
+          await axios.put(`http://localhost:5000/api/reservas/${reserva.id_Reservas}/estado`, { estado: nuevoEstado });
+
+          const nuevasReservas = reservas.map((res, i) =>
+            i === index ? nuevaReserva : res
+          );
+          setReservas(nuevasReservas);
+          inicializarDataTable(nuevasReservas);
+
+          Swal.fire({
+            title: nuevoEstado === 'Confirmado' ? '¡Confirmado!' : '¡Cancelado!',
+            text: `La reserva ha sido ${nuevoEstado.toLowerCase()}.`,
+            icon: 'success',
+          });
+        } catch (error) {
+          console.error(`Error al ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'} la reserva:`, error);
+          Swal.fire({
+            title: 'Error',
+            text: 'No se pudo actualizar el estado de la reserva.',
+            icon: 'error',
+          });
+        }
       }
-    } catch (error) {
-      console.error(`Error al ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'} la reserva:`, error);
-      Swal.fire({
-        title: 'Error',
-        text: `Hubo un problema al ${nuevoEstado === 'Confirmado' ? 'confirmar' : 'cancelar'} la reserva.`,
-        icon: 'error'
-      });
-    }
+    });
   };
 
-  const handleFiltroChange = (e) => {
-    setFiltro(e.target.value);
-  };
+  const styles = `
+  .page-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    padding: 20px;
+  }
+  .content h2 {
+    font-family: 'Poppins-SemiBold', sans-serif;
+    color: #28a745;
+    font-size: 3.5rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 30px;
+    background: linear-gradient(90deg, #1db954, #1ca54f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .table-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 95%;
+    margin: 20px auto;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  table.dataTable {
+    width: 100% !important;
+    font-size: 1.2rem;
+  }
+  .btn-icon {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 1.5rem;
+    margin: 0 5px;
+    transition: transform 0.2s ease, background-color 0.3s ease;
+  }
+  .btn-icon:hover {
+    transform: scale(1.1);
+    background-color: rgba(220, 220, 220, 0.3);
+    border-radius: 50%;
+  }
+  .icon-check {
+    color: #28a745;
+  }
+  .icon-cancel {
+    color: #dc3545;
+  }
+  .btn-icon:disabled {
+    opacity: 0.6;
+  }
+`;
 
-  const reservasFiltradas = reservas.filter((reserva) =>
-    filtro === 'todos' ? true : reserva.estado === filtro
-  );
 
   return (
-    <div>
-      <NavBarEmpleado />
-      <Container>
-        <h2>Reservas</h2>
-        <p>Estas son las últimas reservas que has hecho</p>
-        <FilterContainer>
-          <FilterSelect value={filtro} onChange={handleFiltroChange}>
-            <option value="todos">Todos</option>
-            <option value="Por Confirmar">Por confirmar</option>
-            <option value="Confirmado">Confirmada</option>
-            <option value="Asistida">Asistida</option>
-            <option value="Cancelado">Cancelada</option>
-          </FilterSelect>
-        </FilterContainer>
-        <TableContainer>
-          <Table>
-            <thead>
-              <tr>
-                <Th>Fecha de inicio</Th>
-                <Th>Fecha de final</Th>
-                <Th>Celular</Th>
-                <Th>Correo</Th>
-                <Th>Nombre del Dueño</Th>
-                <Th>Nombre de la Mascota</Th>
-                <Th>Tipo de Servicio</Th>
-                <Th>Estado</Th>
-                <Th>Acciones</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {reservasFiltradas.map((reserva, index) => (
-                <tr key={reserva.id_Reservas}>
-                  <Td>{reserva.fecha_Inicio}</Td>
-                  <Td>{reserva.fecha_Fin}</Td>
-                  <Td>{reserva.celular}</Td>
-                  <Td>{reserva.correo}</Td>
-                  <Td>{reserva.nombre_dueño}</Td>
-                  <Td>{reserva.nombre_mascota}</Td>
-                  <Td>{reserva.tipo_servicio}</Td>
-                  <Td>{reserva.estado}</Td>
-                  <Td>
-                    <Button
-                      onClick={() => actualizarEstadoReserva(index, 'Confirmado')}
-                      disabled={reserva.estado === 'Confirmado' || reserva.estado === 'Cancelado'}
-                      color="#28a745"
-                      hoverColor="#218838"
-                    >
-                      <Icon>
-                        <MdCheckCircle />
-                      </Icon>
-                    </Button>
-                    <Button
-                      onClick={() => actualizarEstadoReserva(index, 'Cancelado')}
-                      disabled={reserva.estado === 'Confirmado' || reserva.estado === 'Cancelado'}
-                      color="#dc3545"
-                      hoverColor="#c82333"
-                    >
-                      <Icon>
-                        <MdCancel />
-                      </Icon>
-                    </Button>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
-        </TableContainer>
-      </Container>
-      <Footer />
-    </div>
+    <>
+      <style>{styles}</style>
+      <div className="page-container">
+        <NavBarEmpleado />
+        <main>
+          <section className="container">
+            <div className="content">
+              <h2 className="fade-in">Consultar Reservas</h2>
+              <div className="table-wrapper">
+                <table ref={tableRef} className="display" style={{ width: '100%' }}></table>
+              </div>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    </>
   );
 };
 

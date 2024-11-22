@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components'; // Usa Axios para hacer la llamada a la API
+import styled from 'styled-components';
 import Perro1 from '../../assets/Imagenes/perro1.jpeg';
 import Footer from '../../components/footer';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import axios from 'axios';
-
 
 const HeroSection = styled.section`
   position: relative;
@@ -59,17 +58,17 @@ const NavLinks = styled.div`
 `;
 
 const Circle = styled.div`
-  width: 40px; 
-  height: 40px; 
-  background-color: orange; /* Color del círculo */
-  border-radius: 50%; 
+  width: 40px;
+  height: 40px;
+  background-color: orange;
+  border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
   color: white;
   font-size: 1.2rem;
   font-weight: bold;
-  text-transform: uppercase; /* Para asegurarse de que las letras estén en mayúsculas */
+  text-transform: uppercase;
 `;
 
 const Dropdown = styled.div`
@@ -116,38 +115,54 @@ const MenuEmpleado = () => {
   const [nombre, setNombre] = useState('');
   const [initials, setInitials] = useState('');
   const [inscripciones, setInscripciones] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 4; // Cantidad de tarjetas por página
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Obtener el nombre del usuario desde localStorage
     const nombreUsuario = localStorage.getItem('nombreUsuario');
-    console.log("Nombre de usuario desde localStorage:", nombreUsuario);
-
     if (nombreUsuario) {
       const iniciales = `${nombreUsuario.charAt(0)}`;
       setInitials(iniciales);
-      setNombre(nombreUsuario); // Asignar el nombre al estado si está presente
-    } else {
-      console.log('No se encontró el nombre del usuario en localStorage');
+      setNombre(nombreUsuario);
     }
 
-     // Carga de datos de mascotas desde el backend
-     axios.get('http://localhost:5000/api/colegio/pendientes')
-    .then(response => {
-      console.log("Datos de inscripciones pendientes:", response.data);
-      setInscripciones(response.data);
-    })
-    .catch(error => console.error("Error al obtener inscripciones pendientes:", error));
+    axios.get('http://localhost:5000/api/colegio/pendientes')
+      .then(response => {
+        setInscripciones(response.data);
+      })
+      .catch(error => console.error("Error al obtener inscripciones pendientes:", error));
   }, []);
 
   const handleConfirm = (id_Servicio) => {
     axios.post(`http://localhost:5000/api/colegio/${id_Servicio}/confirmar`)
       .then(() => {
         Swal.fire('Inscripción confirmada', '', 'success');
-        // Actualizar el estado eliminando la inscripción confirmada
         setInscripciones(inscripciones.filter(inscripcion => inscripcion.id_Servicio !== id_Servicio));
       })
       .catch(error => console.error("Error al confirmar la inscripción:", error));
+  };
+
+  const handleReject = (id_Servicio) => {
+    axios.post(`http://localhost:5000/api/colegio/${id_Servicio}/rechazar`)
+      .then(() => {
+        Swal.fire('Inscripción rechazada', '', 'success');
+        setInscripciones(inscripciones.filter(inscripcion => inscripcion.id_Servicio !== id_Servicio));
+      })
+      .catch(error => console.error("Error al rechazar la inscripción:", error));
+  };
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedItems = inscripciones.slice(startIndex, startIndex + itemsPerPage);
+
+  const totalPages = Math.ceil(inscripciones.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) setCurrentPage(currentPage - 1);
   };
 
   const handleLogout = () => {
@@ -158,35 +173,16 @@ const MenuEmpleado = () => {
       showConfirmButton: false,
       timer: 1500
     }).then(() => {
-      // Limpiar todos los datos de la sesión del localStorage
       localStorage.removeItem('usuarioId');
-      localStorage.removeItem('nombreUsuario'); // Si estás guardando más información, asegúrate de remover todo
-  
-      // También puedes limpiar todo el localStorage si es necesario
-      // localStorage.clear();
-  
-      // Redirigir al usuario a la página de inicio de sesión
+      localStorage.removeItem('nombreUsuario');
       navigate('/');
     });
-    
   };
-
-  // Función para rechazar inscripción
-  const handleReject = (id_Servicio) => {
-    axios.post(`http://localhost:5000/api/colegio/${id_Servicio}/rechazar`)
-      .then(() => {
-        Swal.fire('Inscripción rechazada', '', 'success');
-        setInscripciones(inscripciones.filter(inscripcion => inscripcion.id_Servicio !== id_Servicio));
-      })
-      .catch(error => console.error("Error al rechazar la inscripción:", error));
-  };
-  
 
   return (
     <div>
       <HeroSection>
         <Navbar>
-          {/* Enlaces con Dropdowns */}
           <NavLinks>
             <Dropdown>
               <Link href="/menuEmpleado">Inicio</Link>
@@ -211,16 +207,14 @@ const MenuEmpleado = () => {
               </DropdownContent>
             </Dropdown>
             <Dropdown>
-            <Circle>
-              {initials} {/* Muestra las iniciales dentro del círculo */}
-            </Circle>
-            <DropdownContent className="dropdown-content">
-              <DropdownContentLink href="/miPerfilE">Mi Perfil</DropdownContentLink>
-              <DropdownContentLink href="#" onClick={handleLogout}>
-                Cerrar sesión
-              </DropdownContentLink>
-            </DropdownContent>
-          </Dropdown>
+              <Circle>{initials}</Circle>
+              <DropdownContent className="dropdown-content">
+                <DropdownContentLink href="/miPerfilE">Mi Perfil</DropdownContentLink>
+                <DropdownContentLink href="#" onClick={handleLogout}>
+                  Cerrar sesión
+                </DropdownContentLink>
+              </DropdownContent>
+            </Dropdown>
           </NavLinks>
         </Navbar>
 
@@ -228,35 +222,69 @@ const MenuEmpleado = () => {
         <HeroText>Bienvenido, {nombre}</HeroText>
       </HeroSection>
 
-      {/* Sección de mascotas asignadas */}
       <div className="min-h-screen bg-gray-100 p-5">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-800">Inscripciones Pendientes en Colegio</h2>
+  <div className="text-center mb-8">
+    <h2 className="text-3xl font-bold text-gray-800">Inscripciones Pendientes en Colegio</h2>
+  </div>
+  <div className="flex flex-wrap justify-center gap-6">
+    {paginatedItems.map((inscripcion) => (
+      <div
+        key={inscripcion.id_Servicio}
+        className="bg-white shadow-lg rounded-lg p-5 max-w-xs transition-transform transform hover:scale-105 hover:shadow-xl"
+      >
+        <h3 className="text-xl font-semibold text-gray-800">{inscripcion.nombre_mascota}</h3>
+        <p className="text-gray-600">Raza: {inscripcion.raza}</p>
+        <p className="text-gray-600">Edad: {inscripcion.edad}</p>
+        <p className="text-gray-600">Dueño: {inscripcion.nombre_dueño}</p>
+        <p className="text-gray-600">Contacto: {inscripcion.contacto_dueño}</p>
+        <div className="mt-4 flex gap-2">
+          <button
+            onClick={() => handleConfirm(inscripcion.id_Servicio)}
+            className="flex-1 bg-green-500 text-white px-4 py-2 rounded transition-all hover:bg-green-600 shadow hover:shadow-md"
+          >
+            Confirmar Inscripción
+          </button>
+          <button
+            onClick={() => handleReject(inscripcion.id_Servicio)}
+            className="flex-1 bg-red-500 text-white px-4 py-2 rounded transition-all hover:bg-red-600 shadow hover:shadow-md"
+          >
+            Rechazar
+          </button>
+        </div>
       </div>
-      <div className="flex flex-wrap justify-center gap-6">
-        {inscripciones.map((inscripcion) => (
-          <div key={inscripcion.id_Servicio} className="bg-white shadow-lg rounded-lg p-5 max-w-xs">
-            <h3 className="text-xl font-semibold">{inscripcion.nombre_mascota}</h3>
-            <p className="text-gray-600">Raza: {inscripcion.raza}</p>
-            <p className="text-gray-600">Edad: {inscripcion.edad}</p>
-            <p className="text-gray-600">Dueño: {inscripcion.nombre_dueño}</p>
-            <p className="text-gray-600">Contacto: {inscripcion.contacto_dueño}</p>
-            <button
-              onClick={() => handleConfirm(inscripcion.id_Servicio)}
-              className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Confirmar Inscripción
-            </button>
-            <button
-                onClick={() => handleReject(inscripcion.id_Servicio)}
-                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
-              >
-                Rechazar
-              </button>
-          </div>
-        ))}
-      </div>
+    ))}
+  </div>
+
+  {inscripciones.length > itemsPerPage && (
+    <div className="flex justify-center mt-6 gap-4">
+      <button
+        onClick={handlePreviousPage}
+        disabled={currentPage === 1}
+        className={`px-4 py-2 rounded font-medium ${
+          currentPage === 1
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-green-400 text-white hover:bg-green-500 shadow-md hover:shadow-lg'
+        } transition-colors duration-300`}
+      >
+        Anterior
+      </button>
+      <span className="px-4 py-2 text-gray-700 font-medium">{`Página ${currentPage} de ${totalPages}`}</span>
+      <button
+        onClick={handleNextPage}
+        disabled={currentPage === totalPages}
+        className={`px-4 py-2 rounded font-medium ${
+          currentPage === totalPages
+            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            : 'bg-green-400 text-white hover:bg-green-500 shadow-md hover:shadow-lg'
+        } transition-colors duration-300`}
+      >
+        Siguiente
+      </button>
     </div>
+  )}
+</div>
+
+
 
 
       <Footer />
