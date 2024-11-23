@@ -20,7 +20,7 @@ const db = mysql.createPool({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   waitForConnections: true,
-  connectionLimit: 10,
+  connectionLimit: 11,
   queueLimit: 0
 });
 
@@ -904,28 +904,24 @@ app.put('/api/empleado/quejas/:id', async (req, res) => {
     res.status(500).json({ error: 'Error al responder la queja.' });
   }
 });
-
+ 
 
 // Endpoint para actualizar el rol de un usuario
 app.put('/api/usuarios/:id/rol', async (req, res) => {
-  const { id } = req.params; // ID del usuario enviado desde el frontend
-  const { rol } = req.body; // Nuevo rol enviado en el cuerpo de la solicitud
+  const { id } = req.params;
+  const { rol } = req.body;
 
   if (!rol) {
     return res.status(400).json({ error: 'El campo "rol" es obligatorio.' });
   }
 
-  // Verifica que el rol sea válido
   const rolesPermitidos = ['Cliente', 'Empleado'];
   if (!rolesPermitidos.includes(rol)) {
     return res.status(400).json({ error: 'El rol especificado no es válido.' });
   }
 
   try {
-    const result = await executeQuery(
-      'UPDATE usuario SET rol = ? WHERE id_Usuario = ?',
-      [rol, id]
-    );
+    const result = await executeQuery('UPDATE usuario SET rol = ? WHERE id_Usuario = ?', [rol, id]);
 
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Usuario no encontrado.' });
@@ -939,9 +935,11 @@ app.put('/api/usuarios/:id/rol', async (req, res) => {
 });
 
 
+
+
 // Endpoint para buscar usuario por número de documento
-app.get('/api/usuarios/buscar', async (req, res) => {
-  const { documento } = req.query;
+app.get('/api/usuarios/buscar/:documento', async (req, res) => {
+  const { documento } = req.params; // Cambiar a req.params
 
   if (!documento) {
     return res.status(400).json({ error: 'El número de documento es requerido.' });
@@ -960,4 +958,16 @@ app.get('/api/usuarios/buscar', async (req, res) => {
     res.status(500).json({ error: 'Error al buscar el usuario.' });
   }
 });
+
+// Endpoint para obtener empleados
+app.get('/api/gerente/mis-empleados', async (req, res) => {
+  try {
+    const empleados = await executeQuery('SELECT id_Usuario, nombre, apellido, correo, celular, rol FROM usuario WHERE rol = ?', ['Empleado']);
+    res.status(200).json(empleados);
+  } catch (error) {
+    console.error('Error al obtener empleados:', error.message);
+    res.status(500).json({ error: 'Error al obtener empleados.' });
+  }
+});
+
 
