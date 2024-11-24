@@ -111,35 +111,6 @@ const DropdownContentLink = styled.a`
   }
 `;
 
-const Button = styled.button`
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  font-size: 16px;
-  border-radius: 5px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-
-  &:disabled {
-    background-color: #cccccc;
-    cursor: not-allowed;
-  }
-`;
-
-const FormGroup = styled.div`
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column; /* Cambio para que los elementos estén uno debajo del otro */
-  align-items: center;
-  gap: 20px; /* Espacio entre el selector y el botón */
-`;
-
 const Menu = () => {
   const [mascotas, setMascotas] = useState([]); // Estado para almacenar las mascotas del cliente
   const [selectedMascota, setSelectedMascota] = useState('');
@@ -200,29 +171,55 @@ const Menu = () => {
   };
 
   // Función para inscribir una mascota en el servicio de colegio
-  const handleInscribirMascota = async () => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/servicios/inscribir-colegio`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          mascotaId: selectedMascota,
-          userId: localStorage.getItem('usuarioId'),
-        }),
-      });
+ // Función para inscribir una mascota en el servicio de colegio
+const handleInscribirMascota = async () => {
+  try {
+    const response = await fetch(`http://localhost:5000/api/servicios/inscribir-colegio`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        mascotaId: selectedMascota,
+        userId: localStorage.getItem('usuarioId'),
+      }),
+    });
 
-      if (response.ok) {
-        setInscripcionStatus('Mascota inscrita exitosamente en el servicio de colegio.');
+    if (response.ok) {
+      setInscripcionStatus('Mascota inscrita exitosamente en el servicio de colegio.');
+      Swal.fire({
+        icon: 'success',
+        title: 'Inscripción exitosa',
+        text: 'Tu mascota ha sido inscrita exitosamente. Un empleado se pondrá en contacto contigo.',
+      });
+    } else {
+      const errorData = await response.json();
+      if (errorData.error === 'La mascota ya está inscrita en el servicio de colegio.') {
+        Swal.fire({
+          icon: 'warning',
+          title: 'Mascota ya inscrita',
+          text: 'No puedes inscribir esta mascota porque ya está inscrita en el colegio.',
+        });
       } else {
         setInscripcionStatus('Error al inscribir la mascota en el servicio de colegio.');
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Hubo un problema al intentar inscribir a tu mascota. Por favor, intenta nuevamente.',
+        });
       }
-    } catch (error) {
-      setInscripcionStatus('Error de red al intentar inscribir la mascota.');
-      console.error('Error de red:', error);
     }
-  };
+  } catch (error) {
+    setInscripcionStatus('Error de red al intentar inscribir la mascota.');
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de red',
+      text: 'No se pudo conectar con el servidor. Por favor, revisa tu conexión e intenta nuevamente.',
+    });
+    console.error('Error de red:', error);
+  }
+};
+
    
   return (
     <div>

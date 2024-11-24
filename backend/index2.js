@@ -340,14 +340,29 @@ app.post('/api/mascotas/perfil', async (req, res) => {
         SELECT * FROM clientemascota cm
         INNER JOIN cliente c ON cm.id_ClienteFK1 = c.id_Cliente
         WHERE cm.id_MascotaFK = ? AND c.id_Usuario = ?`,
-        [mascotaId, userId]);
+        [mascotaId, userId]
+      );
   
       if (verificaMascota.length === 0) {
         return res.status(404).json({ error: 'La mascota no pertenece a este usuario.' });
       }
   
+      // Verificar si la mascota ya está inscrita en el servicio de colegio
+      const verificaInscripcion = await executeQuery(`
+        SELECT * FROM colegio
+        WHERE id_MascotaFK = ? AND tipo_servicio = "colegio"`,
+        [mascotaId]
+      );
+  
+      if (verificaInscripcion.length > 0) {
+        return res.status(400).json({ error: 'La mascota ya está inscrita en el servicio de colegio.' });
+      }
+  
       // Inscribir la mascota en el servicio de colegio
-      await executeQuery('INSERT INTO colegio (id_MascotaFK, tipo_servicio, estado) VALUES (?, "colegio", "Pendiente")', [mascotaId]);
+      await executeQuery(
+        'INSERT INTO colegio (id_MascotaFK, tipo_servicio, estado) VALUES (?, "colegio", "Pendiente")',
+        [mascotaId]
+      );
   
       res.status(200).json({ message: 'Mascota inscrita en el servicio de colegio exitosamente.' });
     } catch (error) {
@@ -357,59 +372,93 @@ app.post('/api/mascotas/perfil', async (req, res) => {
   });
   
   
-// Endpoint para registrar una nueva reserva
-app.post('/api/reservas', async (req, res) => {
-  const { fechaInicio, fechaFinal, mascota, tipoServicio, usuarioId } = req.body;
-
-  // Validación de campos requeridos
-  if (!fechaInicio || !mascota || !tipoServicio || !usuarioId) {
-    return res.status(400).json({ error: 'Todos los campos obligatorios deben estar presentes.' });
-  }
-  if (tipoServicio === 'Hotel' && !fechaFinal) {
-    return res.status(400).json({ error: 'La fecha final es obligatoria para el servicio de hotel.' });
-  }
-
-  try {
-    // Obtener el id del cliente asociado al usuarioId
-    const clienteResult = await executeQuery('SELECT id_Cliente FROM cliente WHERE id_Usuario = ?', [usuarioId]);
-
-    if (clienteResult.length === 0) {
-      return res.status(404).json({ error: 'No se encontró el cliente asociado a este usuario.' });
+  
+  app.post('/api/reservas', async (req, res) => {
+    const { fechaInicio, fechaFinal, mascota, tipoServicio, usuarioId } = req.body;
+  
+    // Validación de campos requeridos
+    if (!fechaInicio || !mascota || !tipoServicio || !usuarioId) {
+      return res.status(400).json({ error: 'Todos los campos obligatorios deben estar presentes.' });
     }
-
-    const idCliente = clienteResult[0].id_Cliente;
-
-    // Obtener el id de la mascota seleccionada y verificar que pertenece al cliente
-    const mascotaResult = await executeQuery(`
-      SELECT m.id_Mascota
-      FROM mascotas m
-      INNER JOIN clientemascota cm ON m.id_Mascota = cm.id_MascotaFK
-      WHERE m.nombre = ? AND cm.id_ClienteFK1 = ?
-    `, [mascota, idCliente]);
-
-    if (mascotaResult.length === 0) {
-      return res.status(404).json({ error: 'La mascota seleccionada no pertenece a este cliente.' });
+    if (tipoServicio === 'Hotel' && !fechaFinal) {
+      return res.status(400).json({ error: 'La fecha final es obligatoria para el servicio de hotel.' });
     }
-
-    const idMascota = mascotaResult[0].id_Mascota;
-
-    // Crear la reserva en la tabla `reservas`
-    const reservaResult = await executeQuery(`
-      INSERT INTO reservas (fecha_Inicio, fecha_Fin, tipo_servicio, estado)
-      VALUES (?, ?, ?, 'Por Confirmar')
-    `, [fechaInicio, fechaFinal, tipoServicio]);
-
-    const idReserva = reservaResult.insertId;
-
-    // Registrar la relación en `clienteReserva` con `id_ClienteFK3`, `id_ReservaFK1`, y `id_MascotaFK`
-    await executeQuery('INSERT INTO clienteReserva (id_ClienteFK3, id_ReservaFK1, id_MascotaFK) VALUES (?, ?, ?)', [idCliente, idReserva, idMascota]);
-
-    res.status(201).json({ message: 'Reserva registrada exitosamente.' });
-  } catch (error) {
-    console.error('Error al registrar la reserva:', error.message);
-    res.status(500).json({ error: 'Error al registrar la reserva.' });
-  }
-});
+  
+    try {
+      // Obtener el id del cliente asociado al usuarioId
+      const clienteResult = await executeQuery('SELECT id_Cliente FROM cliente WHERE id_Usuario = ?', [usuarioId]);
+  
+      if (clienteResult.length === 0) {
+        return res.status(404).json({ error: 'No se encontró el cliente asociado a este usuario.' });
+      }
+  
+      const idCliente = clienteResult[0].id_Cliente;
+  
+      // Obtener el id de la mascota seleccionada y verificar que pertenece al cliente
+      const mascotaResult = await executeQuery(`
+        SELECT m.id_Mascota
+        FROM mascotas m
+        INNER JOIN clientemascota cm ON m.id_Mascota = cm.id_MascotaFK
+        WHERE m.nombre = ? AND cm.id_ClienteFK1 = ?
+      `, [mascota, idCliente]);
+  
+      if (mascotaResult.length === 0) {
+        return res.status(404).json({ error: 'La mascota seleccionada no pertenece a este cliente.' });
+      }
+  
+      const idMascota = mascotaResult[0].id_Mascota;
+  
+      // Verificar capacidad diaria para pasadía
+      if (tipoServicio === 'pasadia') {
+        const reservasPasadia = await executeQuery(`
+          SELECT COUNT(*) AS totalReservas
+          FROM reservas
+          WHERE fecha_Inicio = ? AND tipo_servicio = 'pasadia'
+        `, [fechaInicio]);
+  
+        if (reservasPasadia[0].totalReservas >= 10) {
+          return res.status(400).json({ error: 'No hay capacidad disponible para pasadía en esta fecha.' });
+        }
+      }
+  
+      // Crear la reserva en la tabla `reservas`
+      const reservaResult = await executeQuery(`
+        INSERT INTO reservas (fecha_Inicio, fecha_Fin, tipo_servicio, estado)
+        VALUES (?, ?, ?, 'Por Confirmar')
+      `, [fechaInicio, fechaFinal, tipoServicio]);
+  
+      const idReserva = reservaResult.insertId;
+  
+      // Registrar la relación en `clienteReserva` con `id_ClienteFK3`, `id_ReservaFK1`, y `id_MascotaFK`
+      await executeQuery('INSERT INTO clienteReserva (id_ClienteFK3, id_ReservaFK1, id_MascotaFK) VALUES (?, ?, ?)', [idCliente, idReserva, idMascota]);
+  
+      res.status(201).json({ message: 'Reserva registrada exitosamente.' });
+    } catch (error) {
+      console.error('Error al registrar la reserva:', error.message);
+      res.status(500).json({ error: 'Error al registrar la reserva.' });
+    }
+  });
+  
+  // Endpoint adicional para obtener disponibilidad diaria de pasadía
+  app.get('/api/reservas/disponibilidad/:fecha', async (req, res) => {
+    const { fecha } = req.params;
+  
+    try {
+      const reservasPasadia = await executeQuery(`
+        SELECT COUNT(*) AS totalReservas
+        FROM reservas
+        WHERE fecha_Inicio = ? AND tipo_servicio = 'pasadia'
+      `, [fecha]);
+  
+      const capacidadRestante = 10 - reservasPasadia[0].totalReservas;
+  
+      res.status(200).json({ capacidadRestante });
+    } catch (error) {
+      console.error('Error al consultar disponibilidad:', error.message);
+      res.status(500).json({ error: 'Error al consultar disponibilidad.' });
+    }
+  });
+  
 
 
 
@@ -799,7 +848,7 @@ app.get('/api/empleados/mascotas/perfil/:id', async (req, res) => {
 
 
 // Endpoint para obtener todas las reservas
-app.get('/api/reservas', async (req, res) => {
+app.get('/api/empleado/reservas', async (req, res) => {
   const sql = `
     SELECT r.id_Reservas, r.fecha_Inicio, r.fecha_Fin, r.tipo_servicio, r.estado,
            m.nombre AS nombre_mascota,

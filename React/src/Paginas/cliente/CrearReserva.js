@@ -15,8 +15,37 @@ const CrearReserva = () => {
 
   const [mascotas, setMascotas] = useState([]);
   const [userId] = useState(localStorage.getItem('usuarioId'));
+  const [disponibilidad, setDisponibilidad] = useState({});
 
   const today = new Date().toISOString().split('T')[0];
+
+  // Consultar disponibilidad por fecha
+const checkDisponibilidad = async (fecha) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/api/reservas/disponibilidad/${fecha}`);
+    setDisponibilidad((prev) => ({
+      ...prev,
+      [fecha]: response.data.capacidadRestante > 0,
+    }));
+  } catch (error) {
+    console.error('Error al consultar disponibilidad:', error);
+  }
+};
+
+// Actualizar disponibilidad para cada día
+useEffect(() => {
+  if (formData.fechaInicio) {
+    checkDisponibilidad(formData.fechaInicio);
+  }
+}, [formData.fechaInicio]);
+
+// Cambiar color según la disponibilidad
+const getInputStyle = (fecha) => {
+  if (!disponibilidad[fecha]) return {};
+  return disponibilidad[fecha]
+    ? { borderColor: 'green' }
+    : { borderColor: 'red' };
+};
 
   // Obtener las mascotas del usuario
   useEffect(() => {
@@ -151,7 +180,7 @@ const CrearReserva = () => {
                   value={formData.fechaInicio}
                   onChange={handleChange}
                   min={today}
-                  style={styles.input}
+                  style={{ ...styles.input, ...getInputStyle(formData.fechaInicio) }}
                   required
                 />
               </div>
