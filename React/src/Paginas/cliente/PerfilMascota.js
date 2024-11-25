@@ -141,7 +141,7 @@ const PerfilMascota = () => {
                   <i className="fa-solid fa-dog text-purple-500 text-2xl"></i>
                 </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-700 -ml-24">Raza</h2>
+                  <h2 className="text-lg font-semibold text-gray-700">Raza</h2>
                   <p className="text-xl font-bold text-gray-900">{mascota.raza}</p>
                 </div>
               </div>
