@@ -2,11 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import NavBarCliente from '../../components/navBarCliente';
 import Footer from '../../components/footer';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
+
 import './PerfilMascota.css';
 import Swal from 'sweetalert2';
-import PerroImg from '../../assets/Imagenes/perro2.jpeg';
 
 const PerfilMascota = () => {
   const { id } = useParams(); // Obtenemos el id de la mascota desde la URL
@@ -95,67 +93,112 @@ const PerfilMascota = () => {
   };
 
   return (
-    <div className="page-container">
-      <NavBarCliente />
-      <div className="container-2">
-        {mascota ? (
-          <>
-            <h1>Perfil de la Mascota</h1>
-            <center>
-              <div className="user-img">
-                <img src={PerroImg} alt="Perfil de la mascota" />
-              </div>
-            </center>
-            <div className="info-section">
-              <div className="info-ite">
-                <div className="info-item">
-                  <i className="fa-solid fa-paw" />
-                  <span>Nombre<br />{mascota.nombre}</span>
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-100 via-gray-50 to-gray-200">
+  <NavBarCliente />
+  <main className="flex-grow container mx-auto py-10 px-6">
+    {mascota ? (
+      <>
+        <h1 className="text-4xl font-extrabold text-center text-gray-800 mb-10">
+          Perfil de la Mascota
+        </h1>
+        <div className="bg-white shadow-xl rounded-xl p-8 md:p-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Columna izquierda */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-blue-100 p-4 rounded-full">
+                  <i className="fa-solid fa-paw text-blue-500 text-2xl"></i>
                 </div>
-                <div className="info-item">
-                  <i className="fa-solid fa-paw" />
-                  <span>Edad<br />{mascota.edad} años</span>
-                </div>
-                <div className="info-item">
-                  <i className="fa-solid fa-paw" />
-                  <span>Peso<br />{mascota.peso} kg</span>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700">Nombre</h2>
+                  <p className="text-xl font-bold text-gray-900">{mascota.nombre}</p>
                 </div>
               </div>
-              <div className="info-ite2">
-                <div className="info-item">
-                  <i className="fa-solid fa-paw" />
-                  <span>Raza<br />{mascota.raza}</span>
+              <div className="flex items-center gap-4">
+                <div className="bg-green-100 p-4 rounded-full">
+                  <i className="fa-solid fa-calendar text-green-500 text-2xl"></i>
                 </div>
-                <div className="info-item">
-                  <i className="fa-solid fa-paw" />
-                  <span>Enfermedades<br />{mascota.enfermedades || "No tiene"}</span>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700 -ml-7">Edad</h2>
+                  <p className="text-xl font-bold text-gray-900">{mascota.edad} años</p>
                 </div>
-                <div className="info-item-direc">
-                  <i className="fa-solid fa-paw" />
-                  <span>Esterilizado<br />{mascota.esterilizado === 'si' ? 'Sí' : 'No'}</span>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-yellow-100 p-4 rounded-full">
+                  <i className="fa-solid fa-weight text-yellow-500 text-2xl"></i>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700 -ml-3">Peso</h2>
+                  <p className="text-xl font-bold text-gray-900">{mascota.peso} kg</p>
                 </div>
               </div>
             </div>
-            <div className="boton">
-              <center>
-                <button onClick={handleEliminar} className="button">Eliminar</button>
-              </center>
+
+            {/* Columna derecha */}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="bg-purple-100 p-4 rounded-full">
+                  <i className="fa-solid fa-dog text-purple-500 text-2xl"></i>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700 -ml-24">Raza</h2>
+                  <p className="text-xl font-bold text-gray-900">{mascota.raza}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-pink-100 p-4 rounded-full">
+                  <i className="fa-solid fa-notes-medical text-pink-500 text-2xl"></i>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700">Enfermedades</h2>
+                  <p className="text-xl font-bold text-gray-900">
+                    {mascota.enfermedades || 'No tiene'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="bg-teal-100 p-4 rounded-full">
+                  <i className="fa-solid fa-syringe text-teal-500 text-2xl"></i>
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-700">Esterilizado</h2>
+                  <p className="text-xl font-bold text-gray-900">
+                    {mascota.esterilizado === 'si' ? 'Sí' : 'No'}
+                  </p>
+                </div>
+              </div>
             </div>
-          </>
-        ) : (
-          <p>Cargando perfil de la mascota...</p>
-        )}
-      </div>
-      <Footer />
-      <a 
-        href="https://wa.me/3103409688" 
-        className="whatsapp-float" 
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
-        <FontAwesomeIcon icon={faWhatsapp} size="2x" />
-      </a>
-    </div>
+          </div>
+        </div>
+
+        {/* Botón de eliminar */}
+        <div className="mt-10 text-center">
+          <button
+            onClick={handleEliminar}
+            className="bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-red-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-300 focus:ring-offset-2"
+          >
+            Eliminar Mascota
+          </button>
+        </div>
+      </>
+    ) : (
+      <p className="text-center text-lg text-gray-600 animate-pulse">
+        Cargando perfil de la mascota...
+      </p>
+    )}
+  </main>
+  <Footer />
+  <a
+    href="https://wa.me/3103409688"
+    className="fixed bottom-6 right-6 bg-green-500 text-white p-4 rounded-full shadow-lg hover:bg-green-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
+    target="_blank"
+    rel="noopener noreferrer"
+  >
+    <i className="fa-brands fa-whatsapp text-xl"></i>
+  </a>
+</div>
+
+
   );
 };
 

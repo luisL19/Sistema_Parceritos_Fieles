@@ -1,8 +1,6 @@
 import React, { useState,  useEffect} from 'react';
 import NavBarCliente from '../../components/navBarCliente'; // Asegúrate de que esta ruta es correcta
 import Footer from '../../components/footer'; // Asegúrate de que esta ruta es correcta
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faWhatsapp } from '@fortawesome/free-brands-svg-icons';
 import './registrar_mascota.css'; // Asegúrate de que esta ruta es correcta
 import Swal from 'sweetalert2';
 import axios from 'axios';
@@ -117,105 +115,149 @@ const RegistroMascota = () => {
   };
 
   return (
-    <div className="page-container">
+    <div className="min-h-screen bg-gradient-to-b from-gray-100 via-white to-gray-100 flex flex-col">
       <NavBarCliente />
-      <div className="container-2" style={{ marginTop: '40px' }}>
-        <h2 className={`title ${showTitle ? 'fade-in' : ''}`}>Registro de Mascotas</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="nombre">Nombre:</label>
-              <input 
-                type="text" 
-                id="nombre" 
-                name="nombre" 
-                placeholder="Ingrese el nombre" 
-                value={formData.nombre}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="raza">Raza:</label>
-              <input 
-                type="text" 
-                id="raza" 
-                name="raza" 
-                placeholder="Ingrese la raza" 
-                value={formData.raza}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="enfermedades">Enfermedades:</label>
-              <input 
-                type="text" 
-                id="enfermedades" 
-                name="enfermedades" 
-                placeholder="Ingrese si tiene enfermedades" 
-                value={formData.enfermedades}
-                onChange={handleChange}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="peso">Peso:</label>
-              <input 
-                type="text" 
-                id="peso" 
-                name="peso" 
-                placeholder="Ingrese el peso" 
-                value={formData.peso}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="edad">Edad:</label>
-              <input 
-                type="number" 
-                id="edad" 
-                name="edad" 
-                placeholder="Ingrese la edad" 
-                value={formData.edad}
-                onChange={handleChange}
-                required 
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="sexo">Sexo</label>
-              <select 
-                id="sexo" 
-                name="sexo" 
-                value={formData.sexo}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione una opción</option>
-                <option value="Macho">Macho</option>
-                <option value="Hembra">Hembra</option>
-              </select>
-            </div>
-            <div className="form-group full-width">
-              <label htmlFor="esterilizado">¿Está Esterilizad@?</label>
-              <select 
-                id="esterilizado" 
-                name="esterilizado" 
-                value={formData.esterilizado}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccione una opción</option>
-                <option value="si">Sí</option>
-                <option value="no">No</option>
-              </select>
-            </div>
-          </div>
-          <center>
-            <button className="boton" type="submit">Guardar</button>
-          </center>
-        </form>
+      <div className="container mx-auto mt-10 p-8 bg-gradient-to-b from-white to-gray-100 shadow-xl rounded-lg">
+      <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">
+    Registro de Mascotas
+  </h2>
+  <form onSubmit={handleSubmit}>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {/* Nombre */}
+      <div>
+        <label htmlFor="nombre" className="block text-lg font-medium text-gray-700 mb-2">
+          Nombre:
+        </label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          placeholder="Ingrese el nombre"
+          value={formData.nombre}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        />
       </div>
+
+      {/* Raza */}
+      <div>
+        <label htmlFor="raza" className="block text-lg font-medium text-gray-700 mb-2">
+          Raza:
+        </label>
+        <input
+          type="text"
+          id="raza"
+          name="raza"
+          placeholder="Ingrese la raza"
+          value={formData.raza}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        />
+      </div>
+
+      {/* Enfermedades */}
+      <div>
+        <label htmlFor="enfermedades" className="block text-lg font-medium text-gray-700 mb-2">
+          Enfermedades:
+        </label>
+        <input
+          type="text"
+          id="enfermedades"
+          name="enfermedades"
+          placeholder="Ingrese si tiene enfermedades"
+          value={formData.enfermedades}
+          onChange={handleChange}
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        />
+      </div>
+
+      {/* Peso */}
+      <div>
+        <label htmlFor="peso" className="block text-lg font-medium text-gray-700 mb-2">
+          Peso:
+        </label>
+        <input
+          type="text"
+          id="peso"
+          name="peso"
+          placeholder="Ingrese el peso"
+          value={formData.peso}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        />
+      </div>
+
+      {/* Edad */}
+      <div>
+        <label htmlFor="edad" className="block text-lg font-medium text-gray-700 mb-2">
+          Edad:
+        </label>
+        <input
+          type="number"
+          id="edad"
+          name="edad"
+          placeholder="Ingrese la edad"
+          value={formData.edad}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        />
+      </div>
+
+      {/* Sexo */}
+      <div>
+        <label htmlFor="sexo" className="block text-lg font-medium text-gray-700 mb-2">
+          Sexo:
+        </label>
+        <select
+          id="sexo"
+          name="sexo"
+          value={formData.sexo}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        >
+          <option value="">Seleccione una opción</option>
+          <option value="Macho">Macho</option>
+          <option value="Hembra">Hembra</option>
+        </select>
+      </div>
+
+      {/* Esterilizado */}
+      <div className="col-span-1 md:col-span-2">
+        <label htmlFor="esterilizado" className="block text-lg font-medium text-gray-700 mb-2">
+          ¿Está Esterilizad@?
+        </label>
+        <select
+          id="esterilizado"
+          name="esterilizado"
+          value={formData.esterilizado}
+          onChange={handleChange}
+          required
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
+        >
+          <option value="">Seleccione una opción</option>
+          <option value="si">Sí</option>
+          <option value="no">No</option>
+        </select>
+      </div>
+    </div>
+
+    {/* Botón */}
+    <div className="text-center mt-8">
+      <button
+        type="submit"
+        className="btn btn-primary actualizar-btn text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300"
+      >
+        Guardar
+      </button>
+    </div>
+  </form>
+    </div>
+
       <Footer />
       <a href="https://wa.me/1234567890" className="whatsapp-button" target="_blank" rel="noopener noreferrer">
         <i className="fab fa-whatsapp"></i>

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/navBarGerente';
 import Footer from '../../components/footer';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Importa FontAwesomeIcon
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import './actualizarMisDatosG.css';
 import Swal from 'sweetalert2';
 
@@ -38,6 +39,10 @@ const userId = localStorage.getItem('usuarioId');
 
     fetchData();
 }, [userId]);
+
+const togglePasswordVisibility = () => {
+  setShowPassword(!showPassword);
+};
 
 
 const handleChange = (e) => {
@@ -101,110 +106,169 @@ const handleSubmit = async (e) => {
   return (
     <div>
       <NavBar />
-      <div className="container-actualizar-datos">
-        <div className="form-section-actualizar-datos">
-          <h2>Actualizar Datos</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-container-actualizar-datos">
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="nombre">Nombre:</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  defaultValue={cliente.nombre}
-                  disabled
-                />
-              </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="apellido">Apellido:</label>
-                <input
-                  type="text"
-                  id="apellido"
-                  name="apellido"
-                  defaultValue={cliente.apellido}
-                  disabled
-                />
-              </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="correo">Correo:</label>
-                <input
-                  type="email"
-                  id="correo"
-                  name="correo"
-                  defaultValue={cliente.correo}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="form-group-actualizar-datos password-container-actualizar-datos">
-                <label htmlFor="contraseña">Contraseña:</label>
-                <div className="password-container-actualizar-datos">
+      <main className="flex-grow container mx-auto py-10 px-6">
+          <div className="container mx-auto mt-10 p-8 bg-gradient-to-b from-white to-gray-100 shadow-xl rounded-lg">
+            <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">Actualizar Datos</h2>
+            <form onSubmit={handleSubmit}>
+              {/* Primera fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Nombre */}
+                <div>
+                  <label htmlFor="nombre" className="block text-lg font-medium text-gray-700 mb-2">
+                    Nombre:
+                  </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="contraseña"
-                    name="contraseña"
-                    defaultValue={cliente.contraseña}
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value={cliente.nombre}
                     onChange={handleChange}
-                    required
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <span
-                    className="eye-icon-actualizar-datos"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </span>
+                </div>
+      
+                {/* Apellido */}
+                <div>
+                  <label htmlFor="apellido" className="block text-lg font-medium text-gray-700 mb-2">
+                    Apellido:
+                  </label>
+                  <input
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    value={cliente.apellido}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
                 </div>
               </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="celular">Celular:</label>
-                <input
-                  type="text"
-                  id="celular"
-                  name="celular"
-                  defaultValue={cliente.celular}
-                  onChange={handleChange}
-                  required
-                />
+      
+              {/* Segunda fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Correo */}
+                <div>
+                  <label htmlFor="correo" className="block text-lg font-medium text-gray-700 mb-2">
+                    Correo:
+                  </label>
+                  <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    value={cliente.correo}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Contraseña */}
+                <div>
+                  <label htmlFor="contraseña" className="block text-lg font-medium text-gray-700 mb-2">
+                    Contraseña:
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="contraseña"
+                      name="contraseña"
+                      value={cliente.contraseña}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <FontAwesomeIcon
+                      icon={showPassword ? faEyeSlash : faEye}
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-5 text-gray-500 cursor-pointer"
+                    />
+                  </div>
+                </div>
               </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="direccion">Dirección:</label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  defaultValue={cliente.direccion}
-                  onChange={handleChange}
-                  required
-                />
+      
+              {/* Tercera fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Celular */}
+                <div>
+                  <label htmlFor="celular" className="block text-lg font-medium text-gray-700 mb-2">
+                    Celular:
+                  </label>
+                  <input
+                    type="text"
+                    id="celular"
+                    name="celular"
+                    value={cliente.celular}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Dirección */}
+                <div>
+                  <label htmlFor="direccion" className="block text-lg font-medium text-gray-700 mb-2">
+                    Dirección:
+                  </label>
+                  <input
+                    type="text"
+                    id="direccion"
+                    name="direccion"
+                    value={cliente.direccion}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
               </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="tipo_documento">Tipo documento:</label>
-                <input
-                  type="text"
-                  id="tipo_documento"
-                  name="tipo_documento"
-                  defaultValue={cliente.tipo_Documento}
-                  disabled
-                />
+      
+              {/* Cuarta fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Tipo de documento */}
+                <div>
+                  <label htmlFor="tipo_documento" className="block text-lg font-medium text-gray-700 mb-2">
+                    Tipo de documento:
+                  </label>
+                  <input
+                    type="text"
+                    id="tipo_documento"
+                    name="tipo_Documento"
+                    value={cliente.tipo_Documento}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Número de documento */}
+                <div>
+                  <label htmlFor="numero_documento" className="block text-lg font-medium text-gray-700 mb-2">
+                    Número de documento:
+                  </label>
+                  <input
+                    type="text"
+                    id="numero_documento"
+                    name="numero_Documento"
+                    value={cliente.numero_Documento}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
               </div>
-              <div className="form-group-actualizar-datos">
-                <label htmlFor="numero_documento">Número Documento:</label>
-                <input
-                  type="text"
-                  id="numero_documento"
-                  name="numero_documento"
-                  defaultValue={cliente.numero_Documento}
-                  disabled
-                />
+      
+              {/* Botón */}
+              <div className="text-center mt-8">
+                <button
+                  type="submit"
+                  className="btn btn-primary actualizar-btn text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300"
+                >
+                  Guardar
+                </button>
               </div>
-            </div>
-            <center>
-              <button type="submit" className="button-actualizar-datos">Guardar</button>
-            </center>
-          </form>
-        </div>
-      </div>
+            </form>
+          </div>
+        </main>
       <Footer />
     </div>
   );

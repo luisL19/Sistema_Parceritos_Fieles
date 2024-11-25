@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import NavBarCliente from '../../components/navBarCliente';
 import Footer from '../../components/footer';
 import $ from 'jquery';
@@ -38,14 +38,7 @@ const ConsultarReservaC = () => {
                 render: (data) => (data ? new Date(data).toLocaleDateString() : '-'),
               },
               { title: 'Estado', data: 'estado' },
-              {
-                title: 'Acciones',
-                data: 'id_reserva',
-                render: (id) =>
-                  `<button class="btn btn-danger cancel-btn" data-id="${id}">
-                    Cancelar
-                  </button>`,
-              },
+              
             ],
             language: {
               url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
@@ -53,14 +46,7 @@ const ConsultarReservaC = () => {
             responsive: true,
           });
 
-          // Manejo de eventos de botones personalizados
-          $(tableRef.current).on('click', '.cancel-btn', async function () {
-            const idReserva = $(this).data('id');
-            const confirmed = window.confirm('¿Estás seguro de que deseas cancelar esta reserva?');
-            if (confirmed) {
-              await handleCancelReserva(idReserva);
-            }
-          });
+          
         } else {
           console.error('Error al obtener las reservas:', response.status);
         }
@@ -78,21 +64,7 @@ const ConsultarReservaC = () => {
     };
   }, [userId]);
 
-  const handleCancelReserva = async (id) => {
-    try {
-      const response = await fetch(`http://localhost:5000/api/reservas/${id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        alert('Reserva cancelada exitosamente.');
-        $(tableRef.current).DataTable().row(`[data-id="${id}"]`).remove().draw();
-      } else {
-        console.error('Error al cancelar la reserva:', response.status);
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
-    }
-  };
+  
 
   return (
     <div className="page-container">

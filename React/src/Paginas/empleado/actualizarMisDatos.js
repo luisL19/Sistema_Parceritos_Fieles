@@ -1,99 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import NavBar from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
-import styled from 'styled-components';
-import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Importa FontAwesomeIcon
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import Swal from 'sweetalert2';
-
-const Container = styled.div`
-  font-family: Arial, sans-serif;
-  max-width: 80%;
-  margin: 0 auto;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 80vh; /* Ensures the container takes at least the height of the viewport */
-`;
-
-const FormSection = styled.div`
-  background: #f4f4f4;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 800px; /* Limits the maximum width of the form */
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Centers the content horizontally */
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 15px;
-  width: 100%; /* Ensure the form groups take the full width of their container */
-
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-  }
-
-  input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    box-sizing: border-box;
-  }
-
-  input[disabled] {
-    background: #e9ecef;
-  }
-
-  .password-container {
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-
-  .password-container input {
-    padding-right: 40px;
-  }
-
-  .password-container .eye-icon {
-    position: absolute;
-    right: 10px;
-    cursor: pointer;
-    font-size: 1.2em;
-  }
-`;
-
-const Button = styled.button`
-  background-color: #36bf18;
-  color: #fff;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  text-align: center;
-  display: block;
-  width: 100%;
-  max-width: 200px;
-  margin: 20px auto 0; /* Center the button and add margin */
-  
-  &:hover {
-    background-color: #28a10d;
-  }
-`;
-
-const FormGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 15px;
-  width: 100%;
-`;
 
 const ActualizarMisDatos = () => {
   const [cliente, setCliente] = useState({
@@ -136,6 +46,9 @@ const handleChange = (e) => {
       ...prevState,
       [name]: value
   }));
+};
+const togglePasswordVisibility = () => {
+  setShowPassword(!showPassword);
 };
 
 
@@ -191,106 +104,169 @@ const handleSubmit = async (e) => {
   return (
     <div>
       <NavBar />
-      <Container>
-        <FormSection>
-          <h2>Actualizar Datos</h2>
-          <form onSubmit={handleSubmit}>
-            <FormGrid>
-              <FormGroup>
-                <label htmlFor="nombre">Nombre:</label>
-                <input
-                  type="text"
-                  id="nombre"
-                  name="nombre"
-                  value={cliente.nombre}
-                  disabled
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="apellido">Apellido:</label>
-                <input
-                  type="text"
-                  id="apellido"
-                  name="apellido"
-                  value={cliente.apellido}
-                  disabled
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="correo">Correo:</label>
-                <input
-                  type="email"
-                  id="correo"
-                  name="correo"
-                  defaultValue={cliente.correo}
-                  onChange={handleChange}
-                  required
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="contraseña">Contraseña:</label>
-                <div className="password-container">
+      <main className="flex-grow container mx-auto py-10 px-6">
+          <div className="container mx-auto mt-10 p-8 bg-gradient-to-b from-white to-gray-100 shadow-xl rounded-lg">
+            <h2 className="text-3xl font-extrabold text-center text-gray-800 mb-8">Actualizar Datos</h2>
+            <form onSubmit={handleSubmit}>
+              {/* Primera fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Nombre */}
+                <div>
+                  <label htmlFor="nombre" className="block text-lg font-medium text-gray-700 mb-2">
+                    Nombre:
+                  </label>
                   <input
-                    type={showPassword ? 'text' : 'password'}
-                    id="contraseña"
-                    name="contraseña"
-                    defaultValue={cliente.contraseña}
+                    type="text"
+                    id="nombre"
+                    name="nombre"
+                    value={cliente.nombre}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Apellido */}
+                <div>
+                  <label htmlFor="apellido" className="block text-lg font-medium text-gray-700 mb-2">
+                    Apellido:
+                  </label>
+                  <input
+                    type="text"
+                    id="apellido"
+                    name="apellido"
+                    value={cliente.apellido}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+      
+              {/* Segunda fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Correo */}
+                <div>
+                  <label htmlFor="correo" className="block text-lg font-medium text-gray-700 mb-2">
+                    Correo:
+                  </label>
+                  <input
+                    type="email"
+                    id="correo"
+                    name="correo"
+                    value={cliente.correo}
                     onChange={handleChange}
                     required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
-                  <span
-                    className="eye-icon"
-                    onClick={() => setShowPassword(!showPassword)}
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </span>
                 </div>
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="celular">Celular:</label>
-                <input
-                  type="text"
-                  id="celular"
-                  name="celular"
-                  defaultValue={cliente.celular}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="direccion">Dirección:</label>
-                <input
-                  type="text"
-                  id="direccion"
-                  name="direccion"
-                  defaultValue={cliente.direccion}
-                  onChange={handleChange}
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="tipo_documento">Tipo documento:</label>
-                <input
-                  type="text"
-                  id="tipo_documento"
-                  name="tipo_documento"
-                  defaultValue={cliente.tipo_Documento}
-                  disabled
-                />
-              </FormGroup>
-              <FormGroup>
-                <label htmlFor="numero_documento">Número Documento:</label>
-                <input
-                  type="text"
-                  id="numero_documento"
-                  name="numero_documento"
-                  defaultValue={cliente.numero_Documento}
-                  disabled
-                />
-              </FormGroup>
-            </FormGrid>
-            <Button type="submit">Guardar</Button>
-          </form>
-        </FormSection>
-      </Container>
+      
+                {/* Contraseña */}
+                <div>
+                  <label htmlFor="contraseña" className="block text-lg font-medium text-gray-700 mb-2">
+                    Contraseña:
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      id="contraseña"
+                      name="contraseña"
+                      value={cliente.contraseña}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <FontAwesomeIcon
+                      icon={showPassword ? faEyeSlash : faEye}
+                      onClick={togglePasswordVisibility}
+                      className="absolute right-3 top-5 text-gray-500 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              </div>
+      
+              {/* Tercera fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Celular */}
+                <div>
+                  <label htmlFor="celular" className="block text-lg font-medium text-gray-700 mb-2">
+                    Celular:
+                  </label>
+                  <input
+                    type="text"
+                    id="celular"
+                    name="celular"
+                    value={cliente.celular}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Dirección */}
+                <div>
+                  <label htmlFor="direccion" className="block text-lg font-medium text-gray-700 mb-2">
+                    Dirección:
+                  </label>
+                  <input
+                    type="text"
+                    id="direccion"
+                    name="direccion"
+                    value={cliente.direccion}
+                    onChange={handleChange}
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+      
+              {/* Cuarta fila */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Tipo de documento */}
+                <div>
+                  <label htmlFor="tipo_documento" className="block text-lg font-medium text-gray-700 mb-2">
+                    Tipo de documento:
+                  </label>
+                  <input
+                    type="text"
+                    id="tipo_documento"
+                    name="tipo_Documento"
+                    value={cliente.tipo_Documento}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+      
+                {/* Número de documento */}
+                <div>
+                  <label htmlFor="numero_documento" className="block text-lg font-medium text-gray-700 mb-2">
+                    Número de documento:
+                  </label>
+                  <input
+                    type="text"
+                    id="numero_documento"
+                    name="numero_Documento"
+                    value={cliente.numero_Documento}
+                    onChange={handleChange}
+                    disabled
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-gray-100 text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              </div>
+      
+              {/* Botón */}
+              <div className="text-center mt-8">
+                <button
+                  type="submit"
+                  className="btn btn-primary actualizar-btn text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-green-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition duration-300"
+                >
+                  Guardar
+                </button>
+              </div>
+            </form>
+          </div>
+        </main>
       <Footer />
     </div>
   );

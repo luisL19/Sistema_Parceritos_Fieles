@@ -281,7 +281,7 @@ const handleInscribirMascota = async () => {
                 id="mascotaSelect"
                 value={selectedMascota}
                 onChange={(e) => setSelectedMascota(e.target.value)}
-                className="block w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="block w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-green-400"
               >
                 <option value="">-- Selecciona una Mascota --</option>
                 {mascotas.map((mascota) => (
@@ -296,7 +296,7 @@ const handleInscribirMascota = async () => {
                 onClick={() => handleInscribirMascota(selectedMascota)}
                 disabled={!selectedMascota}
                 className={`w-full py-2 px-4 rounded-lg font-semibold text-white 
-                  ${selectedMascota ? 'bg-blue-500 hover:bg-blue-600' : 'bg-gray-400 cursor-not-allowed'}`}
+                  ${selectedMascota ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400 cursor-not-allowed'}`}
               >
                 Inscribir en Colegio
               </button>

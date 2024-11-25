@@ -905,7 +905,7 @@ app.put('/api/reservas/:id/estado', async (req, res) => {
 // Endpoint para obtener todas las quejas
 app.get('/api/empleado/quejas', async (req, res) => {
   const sql = `
-    SELECT q.id_Queja, q.fecha, q.contenido,
+    SELECT q.id_Queja, q.fecha, q.contenido, q.respuesta,
             u.nombre AS nombre_cliente, u.apellido AS apellido_cliente, u.correo
     FROM quejas q
     INNER JOIN clientequeja cq ON q.id_Queja = cq.id_QuejaFK1

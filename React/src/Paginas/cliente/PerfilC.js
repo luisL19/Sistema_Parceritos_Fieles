@@ -41,7 +41,7 @@ const PerfilC = () => {
                     <div className="flex flex-col items-center text-center">
                         <img src={Usuario} alt="Perfil del Usuario" className="w-24 h-24 rounded-full mb-4 shadow-md" />
                         <h1 className="text-2xl font-bold text-gray-800 mb-2">Mi Perfil</h1>
-                        <p className="text-gray-500">Información personal del cliente</p>
+                        <p className="text-gray-500">Tú información personal</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
@@ -79,7 +79,7 @@ const PerfilC = () => {
                     <div className="flex justify-center mt-8">
                         <Link
                             to="/actualizar-perfil"
-                            className="bg-blue-500 text-white py-2 px-6 rounded-lg shadow-lg hover:bg-blue-600 transition duration-200"
+                            className="btn btn-primary actualizar-btn text-white py-3 px-7 rounded-lg shadow-lg hover:bg-green-700 transition duration-200"
                         >
                             Actualizar Datos
                         </Link>

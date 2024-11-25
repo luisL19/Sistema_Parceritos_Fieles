@@ -1,191 +1,290 @@
-import React, { useEffect, useRef } from 'react';
-import axios from 'axios';
-import Swal from 'sweetalert2';
+import React, { useState, useEffect } from 'react';
 import NavBarEmpleado from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
-import $ from 'jquery';
-import 'datatables.net';
-import 'datatables.net-dt/css/jquery.dataTables.min.css';
+import axios from 'axios';
+import Swal from 'sweetalert2';
+import styled from 'styled-components';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye } from '@fortawesome/free-solid-svg-icons';
 
-const ConsultarQuejaE = () => {
-  const tableRef = useRef(null);
+const Container = styled.div`
+  max-width: 90%;
+  margin: 0 auto;
+  padding: 20px;
+`;
+
+const TableContainer = styled.div`
+  overflow-x: auto;
+`;
+
+const Table = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+`;
+
+const Th = styled.th`
+  border-bottom: 2px solid #ddd;
+  padding: 12px;
+  background-color: #f4f4f4;
+`;
+
+const Td = styled.td`
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+`;
+
+const Button = styled.button`
+  background-color: ${(props) => (props.primary ? '#24ad60' : '#0d793c')};
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+
+  &:hover {
+    background-color: ${(props) => (props.primary ? '#0d793c' : '#218838')};
+  }
+
+  &:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  height: 100px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  resize: vertical;
+  margin-bottom: 10px;
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: #007bff;
+    outline: none;
+  }
+`;
+
+const QuejaContent = styled.div`
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+`;
+
+const ResponseSection = styled.div`
+  margin-top: 20px;
+`;
+
+const FilterContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: bold;
+  }
+
+  input, select {
+    margin-top: 5px;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      border-color: #007bff;
+      outline: none;
+    }
+  }
+`;
+
+
+const ConsultarQuejasG = () => {
+  const [quejas, setQuejas] = useState([]);
+  const [filteredQuejas, setFilteredQuejas] = useState([]);
+  const [mostrarQueja, setMostrarQueja] = useState(null);
+  const [respuesta, setRespuesta] = useState('');
+  const [fechaFiltro, setFechaFiltro] = useState('');
+  const [respondidaFiltro, setRespondidaFiltro] = useState('');
 
   useEffect(() => {
-    const obtenerQuejas = async () => {
-      try {
-        const respuesta = await axios.get('http://localhost:5000/api/empleado/quejas');
-        const quejasData = respuesta.data;
-
-        if (!Array.isArray(quejasData)) {
-          console.error('La respuesta del backend no es un array:', quejasData);
-          return;
+    const fetchQuejas = async () => {
+        try {
+            const response = await axios.get('http://localhost:5000/api/empleado/quejas'); // Cambia a la nueva ruta
+            // Invertir el orden de los registros para que el último registro sea el primero
+            const data = response.data.reverse();
+            setQuejas(data); // Actualiza el estado con las quejas obtenidas
+            setFilteredQuejas(data); // Actualiza el estado de las quejas filtradas
+        } catch (error) {
+            console.error('Error al obtener las quejas:', error);
         }
-
-        // Destruir instancia previa de DataTable si existe
-        if ($.fn.DataTable && $.fn.DataTable.isDataTable(tableRef.current)) {
-          $(tableRef.current).DataTable().destroy();
-        }
-
-        // Inicializar DataTable con los datos obtenidos
-        $(tableRef.current).DataTable({
-          data: quejasData,
-          columns: [
-            {
-              title: 'Fecha',
-              data: 'fecha',
-              render: (data) => {
-                const date = new Date(data);
-                return date.toISOString().split('T')[0]; // Formato: AAAA-MM-DD
-              },
-            },
-            { title: 'Nombre', data: 'nombre_cliente' },
-            { title: 'Apellido', data: 'apellido_cliente' },
-            { title: 'Correo', data: 'correo' },
-            {
-              title: 'Acciones',
-              data: 'id_Queja',
-              render: (data) =>
-                `<button class="btn-ver-contenido" data-id="${data}">
-                  Ver Contenido
-                </button>`,
-            },
-          ],
-          language: {
-            url: '//cdn.datatables.net/plug-ins/1.11.5/i18n/es-ES.json',
-          },
-          responsive: true,
-        });
-
-        // Manejar eventos de botones personalizados
-        $(tableRef.current).on('click', '.btn-ver-contenido', function () {
-          const idQueja = $(this).data('id');
-          verContenido(idQueja);
-        });
-      } catch (error) {
-        console.error('Error al obtener las quejas:', error);
-      }
     };
 
-    obtenerQuejas();
+    fetchQuejas();
+}, []);
 
-    return () => {
-      // Verificar si DataTable está inicializado antes de destruirlo
-      if ($.fn.DataTable && $.fn.DataTable.isDataTable(tableRef.current)) {
-        $(tableRef.current).DataTable().destroy();
+  useEffect(() => {
+    const aplicarFiltros = () => {
+      let resultado = quejas;
+
+      if (fechaFiltro) {
+        resultado = resultado.filter(queja => queja.fecha.includes(fechaFiltro));
       }
-    };
-  }, []);
 
-  const verContenido = (idQueja) => {
-    Swal.fire({
-      title: 'Contenido de la Queja',
-      text: `Contenido de la queja con ID: ${idQueja}`,
-      icon: 'info',
-    });
+      if (respondidaFiltro) {
+        resultado = resultado.filter(queja => (respondidaFiltro === 'respondida' ? queja.Respuesta : !queja.Respuesta));
+      }
+
+      setFilteredQuejas(resultado);
+    };
+
+    aplicarFiltros();
+  }, [fechaFiltro, respondidaFiltro, quejas]);
+
+  const toggleQueja = (index) => {
+    setMostrarQueja(mostrarQueja === index ? null : index);
+  }; 
+
+
+  const handleEnviarRespuesta = async (queja) => {
+    if (!respuesta) return;
+  
+    try {
+      // Enviar la respuesta al backend junto con el ID de la queja
+      await axios.put(`http://localhost:5000/api/empleado/quejas/${queja.id_Queja}`, {
+        respuesta,
+      });
+  
+      // Actualizar el estado local para reflejar los cambios sin recargar
+      setQuejas((prevQuejas) =>
+        prevQuejas.map((q) =>
+          q.id_Queja === queja.id_Queja ? { ...q, Respuesta: respuesta } : q
+        )
+      );
+  
+      Swal.fire({
+        position: 'top-end',
+        icon: 'success',
+        title: 'Tu respuesta ha sido enviada',
+        showConfirmButton: false,
+        timer: 1500,
+      });
+  
+      setRespuesta('');
+    } catch (error) {
+      console.error('Error al enviar la respuesta:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo enviar la respuesta. Inténtalo nuevamente.',
+      });
+    }
   };
 
-  const styles = `
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background-size: cover;
-      background-position: center;
-      color: white;
-    }
-    .page-container {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-    .container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      flex: 1;
-      padding: 20px;
-    }
-    .content h2 {
-      font-family: 'Poppins-SemiBold', sans-serif;
-      color: #28a745;
-      font-size: 3.5rem;
-      font-weight: bold;
-      text-align: center;
-      margin-bottom: 30px;
-      letter-spacing: 2px;
-      background: linear-gradient(90deg, #1db954, #1ca54f);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .table-wrapper {
-      width: 95%;
-      margin: 20px auto;
-      border-radius: 10px;
-      background-color: #ffffff;
-      box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-      padding: 20px;
-    }
-    table.dataTable {
-      width: 100% !important;
-      max-width: 100%;
-      margin: 20px 0;
-      border-collapse: collapse;
-      font-size: 1.2rem;
-      text-align: center;
-    }
-    table.dataTable thead th {
-      background-color: #28a745;
-      color: white;
-      font-weight: bold;
-      padding: 15px;
-      text-align: center;
-    }
-    table.dataTable tbody tr {
-      background-color: #f9f9f9;
-    }
-    table.dataTable tbody tr:hover {
-      background-color: #e6ffe6;
-    }
-    table.dataTable td,
-    table.dataTable th {
-      padding: 15px;
-      text-align: center;
-      color: black; /* Asegurar que el texto del cuerpo de la tabla sea negro */
-    }
-    .btn-ver-contenido {
-      background-color: #28a745;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    .btn-ver-contenido:hover {
-      background-color: #218838;
-    }
-  `;
-
   return (
-    <>
-      <style>{styles}</style>
-      <div className="page-container">
-        <NavBarEmpleado />
-        <main>
-          <section className="container">
-            <div className="content">
-              <h2>Consultar Quejas</h2>
-              <div className="table-wrapper">
-                <table ref={tableRef} className="display" style={{ width: '100%' }}></table>
-              </div>
-            </div>
-          </section>
-        </main>
-        <Footer />
-      </div>
-    </>
+    <div>
+      <NavBarEmpleado />
+      <Container>
+        <h2>Quejas</h2>
+        <p>Estas son las últimas quejas registradas en el sistema</p>
+        <FilterContainer>
+          <label>
+            Fecha:
+            <input 
+              type="date" 
+              value={fechaFiltro} 
+              onChange={(e) => setFechaFiltro(e.target.value)} 
+            />
+          </label>
+          <label>
+            Estado:
+            <select 
+              value={respondidaFiltro} 
+              onChange={(e) => setRespondidaFiltro(e.target.value)}
+            >
+              <option value="">Todos</option>
+              <option value="respondida">Respondidas</option>
+              <option value="noRespondida">No Respondidas</option>
+            </select>
+          </label>
+        </FilterContainer>
+        <TableContainer>
+          <Table>
+            <thead>
+              <tr>
+                <Th>Fecha</Th>
+                <Th>Nombre</Th>
+                <Th>Apellido</Th>
+                <Th>Correo</Th>
+                <Th>Acción</Th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredQuejas.map((queja, index) => (
+                <React.Fragment key={queja.id}>
+                  <tr>
+                    <Td>{queja.fecha}</Td>
+                    <Td>{queja.nombre_cliente}</Td>
+                    <Td>{queja.apellido_cliente}</Td>
+                    <Td>{queja.correo}</Td>
+                    <Td>
+                      <Button primary onClick={() => toggleQueja(index)}>
+                        <FontAwesomeIcon icon={faEye} />
+                      </Button>
+                    </Td>
+                  </tr>
+                  {mostrarQueja === index && (
+                    <tr>
+                      <Td colSpan={6}>
+                        <QuejaContent>
+                          <p>{queja.contenido}</p>
+                          <ResponseSection>
+                            {queja.respuesta ? (
+                              <p style={{ fontWeight: 'bold', color: 'green' }}>
+                                Respuesta: {queja.respuesta}
+                              </p>
+                            ) : (
+                              <>
+                                <TextArea
+                                  value={respuesta}
+                                  onChange={(e) => setRespuesta(e.target.value)}
+                                  placeholder="Escribe tu respuesta aquí..."
+                                  disabled={queja.respuesta !== null} // Deshabilitar si ya hay respuesta
+                                />
+                                <Button
+                                  onClick={() => handleEnviarRespuesta(queja)}
+                                  disabled={!respuesta || queja.respuesta !== null} // Deshabilitar si ya hay respuesta o no hay texto
+                                >
+                                  Enviar Respuesta
+                                </Button>
+                              </>
+                            )}
+                          </ResponseSection>
+                        </QuejaContent>
+                      </Td>
+                    </tr>
+                  )}
+
+                </React.Fragment>
+              ))}
+            </tbody>
+          </Table>
+        </TableContainer>
+      </Container>
+      <Footer />
+    </div>
   );
 };
 
-export default ConsultarQuejaE;
+export default ConsultarQuejasG;

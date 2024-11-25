@@ -28,7 +28,7 @@ const MiPerfil = () => {
 
   if (loading) return <div className="text-center text-gray-700">Cargando...</div>;
   if (!cliente) return <div className="text-center text-red-600">No se encontraron datos del cliente.</div>;
-
+ 
   return (
     <div className="flex flex-col min-h-screen">
       <NavBar />

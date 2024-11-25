@@ -39,7 +39,7 @@ const ConsultarMascotas = () => {
                 title: 'Acciones',
                 data: 'id_Mascota',
                 render: (data) => `
-                  <a href="/perfil-mascota/${data}" class="btn btn-primary">
+                  <a href="/perfil-mascota/${data}" class="btn btn-primary actualizar-btn"">
                     Perfil
                   </a>
                 `,
