@@ -69,7 +69,7 @@ const App = () => {
                     <Route path="/consultarQuejasG" element={<ConsultarQuejasG/>} />
                     <Route path="/MiPerfilG" element={<MiPerfilG/>} />
                     <Route path="/actualizarDatosG" element={<ActualizarMisDatosG/>} />
-                    <Route path='/verPerfilMascotaG' element={<VerPerfilMascotaG />} />
+                    <Route path='/verPerfilMascotaG/:id' element={<VerPerfilMascotaG />} />
                     <Route path='/asistencia' element={<Asistencias />} />
                 </Routes>
         </Router>
