@@ -39,7 +39,7 @@ const CrearQuejaC = () => {
 
         setIsSaving(true);
         try {
-            const response = await fetch('http://localhost:5000/api/quejas', {
+            const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/quejas', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

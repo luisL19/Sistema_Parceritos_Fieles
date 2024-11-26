@@ -18,7 +18,7 @@ const ConsultarQuejasC = () => {
   // Fetch quejas desde el backend
   const fetchQuejas = useCallback(async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/clientes/${userId}/quejas`);
+      const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/clientes/${userId}/quejas`);
       const data = await response.json();
 
       if (response.ok) {

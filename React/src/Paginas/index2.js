@@ -210,7 +210,7 @@ const toggleConfirmarContraseñaVisibility = () => {
     if (alertaCorreo) return;
 
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const response = await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/login', {
         correo,
         contraseña
       });
@@ -324,7 +324,7 @@ const validarNombre = (nombre) => {
         Rol: 'Cliente',
       };
   
-      await axios.post('http://localhost:5000/api/register', nuevoUsuario);
+      await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/register', nuevoUsuario);
   
       Swal.fire({
         title: 'Registrado con éxito',

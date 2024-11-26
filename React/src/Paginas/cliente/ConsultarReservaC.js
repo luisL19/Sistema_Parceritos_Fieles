@@ -13,7 +13,7 @@ const ConsultarReservaC = () => {
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/clientes/${userId}/reservas`);
+        const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/clientes/${userId}/reservas`);
         if (response.ok) {
           const data = await response.json();
 

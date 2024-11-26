@@ -22,7 +22,7 @@ const CrearReserva = () => {
   // Consultar disponibilidad por fecha
 const checkDisponibilidad = async (fecha) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/reservas/disponibilidad/${fecha}`);
+    const response = await axios.get(`https://sistemainformacionbackend-production.up.railway.app/api/reservas/disponibilidad/${fecha}`);
     setDisponibilidad((prev) => ({
       ...prev,
       [fecha]: response.data.capacidadRestante > 0,
@@ -52,7 +52,7 @@ const getInputStyle = (fecha) => {
     const fetchMascotas = async () => {
       if (!userId) return;
       try {
-        const response = await axios.post('http://localhost:5000/api/clientes/mascotas', { userId });
+        const response = await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/clientes/mascotas', { userId });
         setMascotas(response.data);
       } catch (error) {
         console.error('Error al obtener las mascotas:', error);
@@ -107,7 +107,7 @@ const getInputStyle = (fecha) => {
     console.log('Datos enviados a la API de reserva:', reserva);
   
     try {
-      const response = await axios.post('http://localhost:5000/api/reservas', reserva, {
+      const response = await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/reservas', reserva, {
         headers: {
           'Content-Type': 'application/json'
         }

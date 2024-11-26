@@ -76,7 +76,7 @@ const RegistroMascota = () => {
     };
   
     try {
-      const response = await axios.post('http://localhost:5000/registrar-mascota', cleanFormData);  // Asegúrate de que la URL sea correcta
+      const response = await axios.post('https://sistemainformacionbackend-production.up.railway.app/registrar-mascota', cleanFormData);  // Asegúrate de que la URL sea correcta
   
       if (response.status === 201) {
         Swal.fire({
@@ -240,7 +240,7 @@ const RegistroMascota = () => {
           className="w-full px-4 py-3 border border-gray-300 rounded-lg shadow-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200"
         >
           <option value="">Seleccione una opción</option>
-          <option value="si">Sí</option>
+          <option value="si">Si</option>
           <option value="no">No</option>
         </select>
       </div>

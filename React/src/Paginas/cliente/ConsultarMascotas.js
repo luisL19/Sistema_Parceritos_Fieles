@@ -12,7 +12,7 @@ const ConsultarMascotas = () => {
   useEffect(() => {
     const fetchMascotas = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/clientes/mascotas', {
+        const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/clientes/mascotas', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
