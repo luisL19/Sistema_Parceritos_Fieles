@@ -34,7 +34,8 @@ import MiPerfilG from './Paginas/gerente/MiPerfilG';
 import ActualizarMisDatosG from './Paginas/gerente/ActualizarMisDatosG';
 import VerPerfilMascotaG from './Paginas/gerente/VerPerfilMascotaG';
 import Asistencias from './Paginas/empleado/asistencia';
-
+import RecuperarContraseña from './components/ForgotPassword'
+import FormularioRecuperacion from './components/ResetPassword'
 
 
 const App = () => {
@@ -71,6 +72,8 @@ const App = () => {
                     <Route path="/actualizarDatosG" element={<ActualizarMisDatosG/>} />
                     <Route path='/verPerfilMascotaG/:id' element={<VerPerfilMascotaG />} />
                     <Route path='/asistencia' element={<Asistencias />} />
+                    <Route path='/recuperarContraseña' element={<RecuperarContraseña />} />
+                    <Route path='/recuperar/:token' element={<FormularioRecuperacion />} />
                 </Routes>
         </Router>
     );

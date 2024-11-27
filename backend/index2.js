@@ -7,6 +7,12 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const brevo = require('@getbrevo/brevo')
+
+const client = new brevo.TransactionalEmailsApi()
+
+
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -52,9 +58,27 @@ app.get('/api/users', async (req, res) => {
 
 // Ruta para crear un usuario
 app.post('/api/register', async (req, res) => {
-  const { Nombre, Apellido, Correo, Celular, Direccion, TipoDocumento, NumeroDocumento, Contraseña } = req.body;
+  const {
+    Nombre,
+    Apellido,
+    Correo,
+    Celular,
+    Direccion,
+    TipoDocumento,
+    NumeroDocumento,
+    Contraseña,
+  } = req.body;
 
-  if (!Nombre || !Apellido || !Correo || !Celular || !Direccion || !TipoDocumento || !NumeroDocumento || !Contraseña) {
+  if (
+    !Nombre ||
+    !Apellido ||
+    !Correo ||
+    !Celular ||
+    !Direccion ||
+    !TipoDocumento ||
+    !NumeroDocumento ||
+    !Contraseña
+  ) {
     return res.status(400).json({ error: 'Todos los campos son obligatorios.' });
   }
 
@@ -67,10 +91,13 @@ app.post('/api/register', async (req, res) => {
     }
 
     // Crear el nuevo usuario en la tabla 'usuario'
-    const result = await executeQuery(`
-      INSERT INTO usuario (nombre, apellido, correo, direccion, tipo_Documento, numero_Documento, celular, contraseña, rol) 
+    const result = await executeQuery(
+      `
+      INSERT INTO usuario (nombre, apellido, correo, direccion, tipo_Documento, numero_Documento, celular, contraseña, rol)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Cliente')
-    `, [Nombre, Apellido, Correo, Direccion, TipoDocumento, NumeroDocumento, Celular, Contraseña]);
+    `,
+      [Nombre, Apellido, Correo, Direccion, TipoDocumento, NumeroDocumento, Celular, Contraseña]
+    );
 
     console.log('Usuario creado exitosamente con ID:', result.insertId);
 
@@ -1020,3 +1047,141 @@ app.get('/api/gerente/mis-empleados', async (req, res) => {
 });
 
 
+
+// Endpoint para enviar confirmación de la reserva al correo
+app.post('/api/send-email', async (req, res) => {
+  const { emailCliente, nombreCliente, asunto, htmlContent } = req.body;
+
+  const emailData = {
+    sender: {
+      name: 'Parceritos Fieles',
+      email: 'parceritosfieles@gmail.com', // Este correo debe estar verificado en Brevo
+    },
+    to: [
+      {
+        email: emailCliente,
+        name: nombreCliente || 'Cliente',
+      },
+    ],
+    subject: asunto || 'Correo desde Brevo',
+    htmlContent: htmlContent || '<h1>Hola, buenos días</h1>',
+  };
+
+  try {
+    const response = await client.sendTransacEmail(emailData);
+    console.log('Correo enviado:', response);
+    res.status(200).json({ message: 'Correo enviado exitosamente.', response });
+  } catch (error) {
+    console.error('Error al enviar correo:', error.response?.data || error);
+    res.status(500).json({ error: 'Error al enviar el correo.', details: error.response?.data || error });
+  }
+});
+
+// Endpoint para recuperar contraseña
+const crypto = require('crypto');
+
+app.post('/api/recuperar-contrasena', async (req, res) => {
+  const { emailCliente } = req.body;
+
+  if (!emailCliente) {
+    return res.status(400).json({ error: 'El correo electrónico es obligatorio.' });
+  }
+
+  try {
+    // Verificar si el correo existe
+    const user = await executeQuery('SELECT id_Usuario FROM usuario WHERE correo = ?', [emailCliente]);
+
+    if (user.length === 0) {
+      return res.status(404).json({ error: 'El correo no está registrado.' });
+    }
+
+    const userId = user[0].id_Usuario;
+
+    // Generar un token único
+    const token = crypto.randomBytes(32).toString('hex');
+    const expiration = new Date(Date.now() + 3600 * 1000); // Token válido por 1 hora
+
+    // Guardar el token en la base de datos
+    await executeQuery(
+      'INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE token = ?, expires_at = ?',
+      [userId, token, expiration, token, expiration]
+    );
+
+    // Crear el contenido del correo
+    const resetLink = `http://localhost:3000/recuperar/${token}`;
+    const emailData = {
+      sender: { name: 'Parceritos Fieles', email: 'parceritosfieles@gmail.com' },
+      to: [{ email: emailCliente }],
+      subject: 'Recuperar Contraseña',
+      htmlContent: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; padding: 20px; max-width: 600px; margin: auto; border: 1px solid #ddd; border-radius: 10px;">
+    <h1 style="color: #4CAF50; text-align: center; font-size: 24px;">Hola, buenos días</h1>
+    <p style="text-align: center; font-size: 16px; color: #666;">
+      Hemos recibido una solicitud para restablecer tu contraseña. Si no realizaste esta solicitud, puedes ignorar este mensaje.
+    </p>
+    <p style="text-align: center; font-size: 16px; color: #666;">
+      Para restablecer tu contraseña, haz clic en el siguiente botón:
+    </p>
+    <div style="text-align: center; margin: 20px 0;">
+      <a href="${resetLink}" style="display: inline-block; padding: 10px 20px; background-color: #4CAF50; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;">Restablecer Contraseña</a>
+    </div>
+    <p style="font-size: 14px; color: #999; text-align: center;">
+      Si tienes problemas con el botón anterior, copia y pega este enlace en tu navegador:
+    </p>
+    <p style="font-size: 14px; color: #999; text-align: center; word-wrap: break-word;">
+      ${resetLink}
+    </p>
+    <footer style="margin-top: 30px; text-align: center; color: #aaa; font-size: 12px;">
+      <p>© 2024 Parceritos Fieles. Todos los derechos reservados.</p>
+      <p>Por favor, no respondas a este correo. Este buzón no está monitoreado.</p>
+    </footer>
+  </div>
+      `,
+    };
+
+    // Enviar el correo
+    await client.sendTransacEmail(emailData);
+
+    res.status(200).json({ message: 'Correo enviado exitosamente.' });
+  } catch (error) {
+    console.error('Error al procesar la solicitud:', error.message);
+    res.status(500).json({ error: 'Error al procesar la solicitud.' });
+  }
+});
+
+
+app.post('/api/restablecer-contrasena', async (req, res) => {
+  const { token, nuevaContrasena } = req.body;
+
+  if (!token || !nuevaContrasena) {
+    return res.status(400).json({ error: 'Token y nueva contraseña son obligatorios.' });
+  }
+
+  try {
+    // Validar el token
+    const resetRequest = await executeQuery(
+      'SELECT user_id, expires_at FROM password_resets WHERE token = ?',
+      [token]
+    );
+
+    if (resetRequest.length === 0 || new Date() > new Date(resetRequest[0].expires_at)) {
+      return res.status(400).json({ error: 'El token es inválido o ha expirado.' });
+    }
+
+    const userId = resetRequest[0].user_id;
+
+    // Actualizar la contraseña del usuario
+    await executeQuery(
+      'UPDATE usuario SET contraseña = ? WHERE id_Usuario = ?',
+      [nuevaContrasena, userId]
+    );
+
+    // Eliminar el token usado
+    await executeQuery('DELETE FROM password_resets WHERE token = ?', [token]);
+
+    res.status(200).json({ message: 'Contraseña actualizada exitosamente.' });
+  } catch (error) {
+    console.error('Error al restablecer la contraseña:', error.message);
+    res.status(500).json({ error: 'Error al restablecer la contraseña.' });
+  }
+});

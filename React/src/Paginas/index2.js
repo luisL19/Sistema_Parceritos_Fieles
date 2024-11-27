@@ -18,12 +18,12 @@ import Swal from 'sweetalert2'; // Asegúrate de tener SweetAlert2 instalado
 import axios from 'axios';
 import Icono1 from '../assets/Imagenes/icono1.png';
 import Icono2 from '../assets/Imagenes/icono2.png';
-import Icono3 from '../assets/Imagenes/icono3.png';
 import Icono4 from '../assets/Imagenes/icono4.png';
 import Alert from '@mui/material/Alert'; // Importación de Alert
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import logo from '../assets/Imagenes/logo.png';
+import { Button } from '@mui/material';
 
 
 
@@ -210,7 +210,7 @@ const toggleConfirmarContraseñaVisibility = () => {
     if (alertaCorreo) return;
 
     try {
-      const response = await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/login', {
+      const response = await axios.post('http://localhost:5000/api/login', {
         correo,
         contraseña
       });
@@ -324,7 +324,7 @@ const validarNombre = (nombre) => {
         Rol: 'Cliente',
       };
   
-      await axios.post('https://sistemainformacionbackend-production.up.railway.app/api/register', nuevoUsuario);
+      await axios.post('http://localhost:5000/api/register', nuevoUsuario);
   
       Swal.fire({
         title: 'Registrado con éxito',
@@ -714,54 +714,54 @@ const loginModalRef = useRef(null); // Define el ref para el modal aquí
               </div>
 
               <div className="form-group">
-  <label htmlFor="contraseña">Contraseña</label>
-  <div style={{ position: 'relative', width: '100%' }}>
-    <input
-      type={contraseñaVisible ? "text" : "password"}
-      id="contraseña"
-      placeholder="Tu contraseña"
-      value={contraseña}
-      onChange={(e) => setContraseña(e.target.value)}
-      required
-      style={{
-        paddingLeft: '10px', // Reduce el padding para el texto del placeholder
-        paddingRight: '40px', // Espacio para el icono a la derecha
-        width: '100%', // Mantener el ancho completo
-        marginTop: '10px'
-      }}
-    />
-    <button
-      type="button"
-      onClick={toggleContraseñaVisibility}
-      style={{
-        position: 'absolute',
-        right: '-75px', // Coloca el icono al borde derecho
-        top: '40%',
-        transform: 'translateY(-50%)',
-        background: 'none',
-        border: 'none',
-        cursor: 'pointer',
-        color: 'black', // Color del icono
-        fontSize: '18px',
-      }}
-    >
-      <FontAwesomeIcon icon={contraseñaVisible ? faEye : faEyeSlash} />
-    </button>
-  </div>
-  {alertaContraseña && (
-    <Alert severity="error" style={{ marginTop: '5px' }}>
-      Contraseña incorrecta
-    </Alert>
-  )}
-</div>
+              <label htmlFor="contraseña">Contraseña</label>
+              <div style={{ position: 'relative', width: '100%' }}>
+                <input
+                  type={contraseñaVisible ? "text" : "password"}
+                  id="contraseña"
+                  placeholder="Tu contraseña"
+                  value={contraseña}
+                  onChange={(e) => setContraseña(e.target.value)}
+                  required
+                  style={{
+                    paddingLeft: '10px', // Reduce el padding para el texto del placeholder
+                    paddingRight: '40px', // Espacio para el icono a la derecha
+                    width: '100%', // Mantener el ancho completo
+                    marginTop: '10px'
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={toggleContraseñaVisibility}
+                  style={{
+                    position: 'absolute',
+                    right: '-75px', // Coloca el icono al borde derecho
+                    top: '40%',
+                    transform: 'translateY(-50%)',
+                    background: 'none',
+                    border: 'none',
+                    cursor: 'pointer',
+                    color: 'black', // Color del icono
+                    fontSize: '18px',
+                  }}
+                >
+                  <FontAwesomeIcon icon={contraseñaVisible ? faEye : faEyeSlash} />
+                </button>
+              </div>
+              {alertaContraseña && (
+                <Alert severity="error" style={{ marginTop: '5px' }}>
+                  Contraseña incorrecta
+                </Alert>
+              )}
+            </div>
 
 
               <button type="submit" className="button">Iniciar Sesión</button>
 
               {/* Sección añadida para recuperar contraseña y registrarse */}
               <div className="form-links">
-                <a href="#">¿Olvidaste tu Contraseña?</a>
-                <a href="#" onClick={handleOpenRegisterModal}>¿No tienes cuenta? Regístrate!</a>
+                <Link to="/recuperarContraseña">¿Olvidaste tu Contraseña?</Link>
+                <a style={{color: 'white', cursor: 'pointer',}} onClick={handleOpenRegisterModal}>¿No tienes cuenta? Regístrate!</a>
               </div>
             </form>
           </div>
