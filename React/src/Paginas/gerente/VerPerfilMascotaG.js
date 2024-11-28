@@ -13,7 +13,7 @@ const VerPerfilMascotaG = () => {
   useEffect(() => {
     const fetchMascota = async () => {
       try {
-        const respuesta = await axios.get(`http://localhost:5000/api/empleados/mascotas/perfil/${id}`);
+        const respuesta = await axios.get(`https://sistemainformacionbackend-production.up.railway.app/api/empleados/mascotas/perfil/${id}`);
         setMascota(respuesta.data.mascota);
         setDueno(respuesta.data.dueno);
       } catch (error) {

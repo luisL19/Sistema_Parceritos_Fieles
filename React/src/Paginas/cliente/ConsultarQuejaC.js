@@ -98,7 +98,7 @@ const ConsultarQuejasC = () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/quejas/${selectedQueja.id_Queja}`, {
+      const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/quejas/${selectedQueja.id_Queja}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

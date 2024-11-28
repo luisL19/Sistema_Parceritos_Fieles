@@ -15,7 +15,7 @@ const PerfilMascota = () => {
   useEffect(() => {
     const fetchMascota = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/mascotas/perfil', {
+        const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/mascotas/perfil', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -12,7 +12,7 @@ const MiPerfilG = () => {
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/usuarios/${userId}/perfil`);
+            const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${userId}/perfil`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -82,7 +82,7 @@ const MiPerfilG = () => {
             {/* Botón de actualización */}
             <div className="mt-8 text-center">
               <a
-                href="/actualizarDatosE"
+                href="/actualizarDatosG"
                 className="bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md transition-transform transform hover:-translate-y-1 duration-300"
               >
                 Actualizar Datos

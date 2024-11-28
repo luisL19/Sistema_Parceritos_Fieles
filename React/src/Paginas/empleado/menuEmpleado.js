@@ -127,7 +127,7 @@ const MenuEmpleado = () => {
       setNombre(nombreUsuario);
     }
 
-    axios.get('http://localhost:5000/api/colegio/pendientes')
+    axios.get('https://sistemainformacionbackend-production.up.railway.app/api/colegio/pendientes')
       .then(response => {
         setInscripciones(response.data);
       })
@@ -135,7 +135,7 @@ const MenuEmpleado = () => {
   }, []);
 
   const handleConfirm = (id_Servicio) => {
-    axios.post(`http://localhost:5000/api/colegio/${id_Servicio}/confirmar`)
+    axios.post(`https://sistemainformacionbackend-production.up.railway.app/api/colegio/${id_Servicio}/confirmar`)
       .then(() => {
         Swal.fire('Inscripción confirmada', '', 'success');
         setInscripciones(inscripciones.filter(inscripcion => inscripcion.id_Servicio !== id_Servicio));
@@ -144,7 +144,7 @@ const MenuEmpleado = () => {
   };
 
   const handleReject = (id_Servicio) => {
-    axios.post(`http://localhost:5000/api/colegio/${id_Servicio}/rechazar`)
+    axios.post(`https://sistemainformacionbackend-production.up.railway.app/api/colegio/${id_Servicio}/rechazar`)
       .then(() => {
         Swal.fire('Inscripción rechazada', '', 'success');
         setInscripciones(inscripciones.filter(inscripcion => inscripcion.id_Servicio !== id_Servicio));

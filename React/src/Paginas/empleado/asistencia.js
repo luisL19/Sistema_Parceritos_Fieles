@@ -3,6 +3,7 @@ import axios from 'axios';
 import NavBar from '../../components/navBarEmpleado';
 import Footer from '../../components/footer';
 import Modal from 'react-modal';
+import Swal from 'sweetalert2';
 
 const customModalStyles = {
   content: {
@@ -49,24 +50,35 @@ const Asistencias = () => {
     }));
 
     axios
-      .post('http://localhost:5000/registrar-asistencias', { asistencias }, {
+      .post('https://sistemainformacionbackend-production.up.railway.app/registrar-asistencias', { asistencias }, {
         headers: { 'Content-Type': 'application/json' },
       })
       .then(() => {
-        alert('Asistencias registradas exitosamente');
+        Swal.fire({
+          title: '¡Éxito!',
+          text: 'Asistencias registradas exitosamente',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+        });
         closeModal('colegio');
         closeModal('hotel');
         closeModal('pasadia');
       })
       .catch((error) => {
         console.error('Error al registrar asistencias:', error);
+        Swal.fire({
+          title: 'Error',
+          text: 'Hubo un problema al registrar las asistencias. Inténtalo nuevamente.',
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+        });
       });
   };
 
   const openModal = (tipo) => {
     const endpoint = tipo === 'colegio' ? '/mascotas/colegio' : `/reservas/${tipo}`;
     axios
-      .get(`http://localhost:5000${endpoint}`)
+      .get(`https://sistemainformacionbackend-production.up.railway.app${endpoint}`)
       .then((response) => {
         setModalData(response.data);
         if (tipo === 'colegio') setIsColegioModalOpen(true);
@@ -75,6 +87,12 @@ const Asistencias = () => {
       })
       .catch((error) => {
         console.error(`Error al obtener datos para ${tipo}:`, error);
+        Swal.fire({
+          title: 'Error',
+          text: `No se pudieron cargar los datos para ${tipo}.`,
+          icon: 'error',
+          confirmButtonText: 'Aceptar',
+        });
       });
   };
 

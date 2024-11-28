@@ -11,7 +11,7 @@ const MiPerfil = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/usuarios/${userId}/perfil`);
+        const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${userId}/perfil`);
         if (!response.ok) {
           throw new Error(`HTTP error! Status: ${response.status}`);
         }

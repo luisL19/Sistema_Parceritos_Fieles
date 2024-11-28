@@ -24,7 +24,7 @@ const userId = localStorage.getItem('usuarioId');
   useEffect(() => {
     const fetchData = async () => {
         try {
-            const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`);
+            const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${userId}`);
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
@@ -71,7 +71,7 @@ const handleSubmit = async (e) => {
   
   if (result.isConfirmed) {
       try {
-          const response = await fetch(`http://localhost:5000/api/usuarios/${userId}`, {
+          const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${userId}`, {
               method: 'PUT',
               headers: {
                   'Content-Type': 'application/json',

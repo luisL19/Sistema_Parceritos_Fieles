@@ -121,7 +121,7 @@ const ConsultarQuejasG = () => {
   useEffect(() => {
     const fetchQuejas = async () => {
         try {
-            const response = await axios.get('http://localhost:5000/api/empleado/quejas'); // Cambia a la nueva ruta
+            const response = await axios.get('https://sistemainformacionbackend-production.up.railway.app/api/empleado/quejas'); // Cambia a la nueva ruta
             // Invertir el orden de los registros para que el último registro sea el primero
             const data = response.data.reverse();
             setQuejas(data); // Actualiza el estado con las quejas obtenidas
@@ -162,7 +162,7 @@ const ConsultarQuejasG = () => {
   
     try {
       // Enviar la respuesta al backend junto con el ID de la queja
-      await axios.put(`http://localhost:5000/api/empleado/quejas/${queja.id_Queja}`, {
+      await axios.put(`https://sistemainformacionbackend-production.up.railway.app/api/empleado/quejas/${queja.id_Queja}`, {
         respuesta,
       });
   

@@ -16,7 +16,7 @@ const ConsultarReservas = () => {
   useEffect(() => {
     const fetchReservas = async () => {
       try {
-        const respuesta = await axios.get('http://localhost:5000/api/empleado/reservas');
+        const respuesta = await axios.get('https://sistemainformacionbackend-production.up.railway.app/api/reservas');
         const data = respuesta.data.reverse();
 
         if (!Array.isArray(data) || data.length === 0) {
@@ -137,7 +137,7 @@ const ConsultarReservas = () => {
         if (result.isConfirmed) {
           try {
             // Actualiza el estado en el backend
-            await axios.put(`http://localhost:5000/api/reservas/${reserva.id_Reservas}/estado`, {
+            await axios.put(`https://sistemainformacionbackend-production.up.railway.app/api/reservas/${reserva.id_Reservas}/estado`, {
               estado: 'Confirmado',
             });
     
@@ -201,7 +201,7 @@ const ConsultarReservas = () => {
       if (result.isConfirmed) {
         try {
           // Actualiza el estado en el backend
-          await axios.put(`http://localhost:5000/api/reservas/${id_Reservas}/estado`, {
+          await axios.put(`https://sistemainformacionbackend-production.up.railway.app/api/reservas/${id_Reservas}/estado`, {
             estado: 'Cancelado',
           });
   

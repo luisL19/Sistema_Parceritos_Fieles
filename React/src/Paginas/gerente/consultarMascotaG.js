@@ -12,7 +12,7 @@ const ConsultarMascotas = () => {
   useEffect(() => {
     const obtenerMascotas = async () => {
       try {
-        const respuesta = await axios.get('http://localhost:5000/api/empleados/consultar-mascotas');
+        const respuesta = await axios.get('https://sistemainformacionbackend-production.up.railway.app/api/empleados/consultar-mascotas');
         const mascotasData = respuesta.data;
 
         // Destruir instancia previa de DataTable si existe

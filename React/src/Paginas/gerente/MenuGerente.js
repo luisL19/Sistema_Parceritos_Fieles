@@ -128,7 +128,7 @@ const MenuGerente = () => {
   // Función para obtener empleados
   const fetchEmpleados = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/gerente/mis-empleados');
+      const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/gerente/mis-empleados');
       if (!response.ok) {
         throw new Error('Error al obtener empleados.');
       }
@@ -152,7 +152,7 @@ const MenuGerente = () => {
    // Función para buscar cliente
    const handleBuscarCliente = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/usuarios/buscar/${documento}`);
+      const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/buscar/${documento}`);
       if (!response.ok) {
         throw new Error('Cliente no encontrado.');
       }
@@ -173,7 +173,7 @@ const MenuGerente = () => {
     if (!clienteEncontrado) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/usuarios/${clienteEncontrado.id_Usuario}/rol`, {
+      const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${clienteEncontrado.id_Usuario}/rol`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -205,7 +205,7 @@ const MenuGerente = () => {
   // Función para eliminar un empleado
   const handleEliminarEmpleado = async (idEmpleado) => {
     try {
-      const response = await fetch(`http://localhost:5000/api/usuarios/${idEmpleado}/rol`, {
+      const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/usuarios/${idEmpleado}/rol`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
