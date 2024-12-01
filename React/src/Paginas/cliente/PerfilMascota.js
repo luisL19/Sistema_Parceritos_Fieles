@@ -56,7 +56,7 @@ const PerfilMascota = () => {
 
     if (result.isConfirmed) {
       try {
-        const response = await fetch('http://localhost:5000/api/mascotas/eliminar', {
+        const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/mascotas/eliminar', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
