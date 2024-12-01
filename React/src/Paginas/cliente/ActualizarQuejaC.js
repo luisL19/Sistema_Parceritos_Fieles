@@ -12,7 +12,7 @@ const ActualizarQuejaC = () => {
         // Función para obtener la queja desde el backend
         const fetchQueja = async () => {
             try {
-                const response = await fetch(`http://localhost:5000/api/quejas/${id_Queja}`); // Ajustar el endpoint
+                const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/quejas/${id_Queja}`); // Ajustar el endpoint
                 if (response.ok) {
                     const data = await response.json();
                     setQueja(data.contenido); // Suponiendo que el campo es "contenido"
