@@ -133,7 +133,7 @@ const Menu = () => {
     // Solicitar mascotas del cliente al backend
     const fetchMascotas = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/clientes/mascotas', {
+        const response = await fetch('https://sistemainformacionbackend-production.up.railway.app/api/clientes/mascotas', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -174,7 +174,7 @@ const Menu = () => {
  // Función para inscribir una mascota en el servicio de colegio
 const handleInscribirMascota = async () => {
   try {
-    const response = await fetch(`http://localhost:5000/api/servicios/inscribir-colegio`, {
+    const response = await fetch(`https://sistemainformacionbackend-production.up.railway.app/api/servicios/inscribir-colegio`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
